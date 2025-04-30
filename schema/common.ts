@@ -6,4 +6,4 @@ export interface SessionPayload extends JWTPayload {
     expiresAt: Date
 };
 
-export type TabType = 'recipes' | 'history' | 'favorite';
+export type TabType = 'recipes' | 'history' | 'favorites';

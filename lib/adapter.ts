@@ -1,20 +1,20 @@
 import { RecipeSchema, GeminiRecipeResponse } from "@/schema/recipe";
+import { getImageFromUnsplash } from "./image-generator";
 
-export const recipeAdapter = (recipes: GeminiRecipeResponse[], user: string) => {
-  const recipeList: RecipeSchema[] = [];
-  recipes.map((item: GeminiRecipeResponse) => {
-    // if (!item.imageUrl || !item.imageUrl.startsWith("http")) {
-    //   item.imageUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(
-    //     item.title.replace(/\s+/g, "-")
-    //   )}`;
-    // }
-    const newRecipe: RecipeSchema = {
-      ...item,
-      isFavorite: false,
-      user
-    };
-    recipeList.push(newRecipe);
-  });
+export const recipeAdapter = async (
+  recipes: GeminiRecipeResponse[],
+  user: string
+) => {
+  const recipeList: RecipeSchema[] = await Promise.all(
+    recipes.map(async (recipe: GeminiRecipeResponse) => {
+      const imageUrl =
+        (await getImageFromUnsplash(recipe.title + " food")) ??
+        `https://source.unsplash.com/featured/?${encodeURIComponent(
+          recipe.title.replace(/\s+/g, "-")
+        )}+food`;
+      return { ...recipe, imageUrl, isFavorite: false, user };
+    })
+  );
 
   return recipeList;
 };

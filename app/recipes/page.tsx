@@ -2,19 +2,23 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChefHat, Plus, Sparkles, Trash } from "lucide-react";
 import { RecipeSchema } from "@/schema/recipe";
-// import { generateRecipe } from "@/app/api/gemini-api/route";
 import { motion } from "framer-motion";
-import RecipeCard from "@/components/recipe-card/RecipeCard";
 import MainSectionLayout from "@/components/main-section/MainSectionLayout";
 import { toast } from "sonner";
 import { CustomButton } from "@/components/CustomButton";
-import { createRecipe, getFavoriteRecipes, getRecipeHistory, updateFavoriteRecipe } from "../actions/recipe";
+import {
+  createRecipe,
+  getFavoriteRecipes,
+  getRecipeHistory,
+  updateFavoriteRecipe,
+} from "../actions/recipe";
 import { TabType } from "@/schema/common";
+import RecipeTab from "@/components/recipe-tabs/RecipeTab";
+import { tabList } from "@/lib/static";
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<RecipeSchema[]>([]);
@@ -23,54 +27,75 @@ export default function RecipesPage() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [newIngredient, setNewIngredient] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [currentTab, setCurrentTab] = useState<TabType>('recipes');
-
-  // useEffect(() => {
-  //   try {
-  //     const savedFavorites = localStorage.getItem("favorites");
-  //     // const savedHistory = localStorage.getItem("searchHistory");
-  //     if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
-  //     // if (savedHistory) setSearchHistory(JSON.parse(savedHistory));
-  //   } catch (error) {
-  //     console.error("Error loading saved data:", error);
-  //   }
-  // }, []);
+  const [currentTab, setCurrentTab] = useState<TabType>("recipes");
 
   useEffect(() => {
     const fetchData = async () => {
-      if(currentTab === 'history') {
+      if (currentTab === "history") {
         const response = await getRecipeHistory();
-        if(response.success) {
-          setSearchHistory(response?.data as RecipeSchema[])
+        if (response.success) {
+          setSearchHistory(response?.data as RecipeSchema[]);
+        } else {
+          toast.error(
+            "An error occured while fetching the recipes, please try again."
+          );
         }
-        else {
-          toast.error("An error occured while fetching the recipes, please try again.");
-        }
-      }
-      else if(currentTab === 'favorite') {
+      } else if (currentTab === "favorites") {
         const response = await getFavoriteRecipes();
-        if(response.success) {
-          setFavorites(response?.data as RecipeSchema[])
-        }
-        else {
-          toast.error("An error occured while fetching the favorite recipes, please try again.");
+        if (response.success) {
+          setFavorites(response?.data as RecipeSchema[]);
+        } else {
+          toast.error(
+            "An error occured while fetching the favorite recipes, please try again."
+          );
         }
       }
-    }
+    };
     fetchData();
-  },[currentTab]);
+  }, [currentTab]);
 
-  const toggleFavorite = async (id: string) => {
-    const response = await updateFavoriteRecipe(id);
-    if(response.success) {
-      const recipe = response.data as RecipeSchema;
-      setFavorites((prev) => {
-        return recipe.isFavorite ? [...prev, recipe] : prev.filter((r) => r.id !== id); 
-      });
-      toast.success(recipe.isFavorite ? "Added to favorites" : "Removed from favorites");
-    }
-    else {
-      toast.error("An error occured while updating the favorites, please try again.");
+  const toggleFavorite = async (recipeId: string) => {
+    try {
+      const response = await updateFavoriteRecipe(recipeId);
+
+      if (response.success && response.data) {
+        const updatedRecipe = response.data as RecipeSchema;
+
+        setRecipes((prev) =>
+          prev.map((recipe) =>
+            recipe.id === recipeId
+              ? { ...recipe, isFavorite: updatedRecipe.isFavorite }
+              : recipe
+          )
+        );
+
+        setSearchHistory((prev) =>
+          prev.map((recipe) =>
+            recipe.id === recipeId
+              ? { ...recipe, isFavorite: updatedRecipe.isFavorite }
+              : recipe
+          )
+        );
+
+        setFavorites((prev) => {
+          if (updatedRecipe.isFavorite) {
+            return [...prev, updatedRecipe];
+          } else {
+            return prev.filter((recipe) => recipe.id !== recipeId);
+          }
+        });
+
+        toast.success(
+          updatedRecipe.isFavorite
+            ? "Recipe added to favorites!"
+            : "Recipe removed from favorites"
+        );
+      } else {
+        toast.error(response.message || "Failed to update favorite status");
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast.error("An error occurred while updating favorite status");
     }
   };
 
@@ -93,13 +118,14 @@ export default function RecipesPage() {
         return;
       }
       const response = await createRecipe(ingredients);
-      if(response.success) {
+      if (response.success) {
         setRecipes(response?.data as RecipeSchema[]);
         setIngredients([]);
-        toast.success('Recipes generated successfully!');
-      }
-      else {
-        toast.error("An error occured while generating recipes, please try again.");
+        toast.success("Recipes generated successfully!");
+      } else {
+        toast.error(
+          "An error occured while generating recipes, please try again."
+        );
       }
     });
   };
@@ -135,7 +161,8 @@ export default function RecipesPage() {
                   className="flex-1 rounded-4xl bg-white"
                 />
                 <CustomButton>
-                  <Plus className="h-4 w-4" />Add
+                  <Plus className="h-4 w-4" />
+                  Add
                 </CustomButton>
               </form>
 
@@ -160,15 +187,17 @@ export default function RecipesPage() {
 
               <div className="flex justify-center items-center">
                 <CustomButton
-                  onClick={() => !isPending ? generateRecipe() : ''}
+                  onClick={() => (!isPending ? generateRecipe() : "")}
                   className="bg-base-secondary h-12 border-none"
-                  style={{padding: '5px'}}
+                  style={{ padding: "5px" }}
                   disabled={isPending || ingredients.length === 0}
                 >
                   <span className="bg-base rounded-full py-1 px-4 h-full w-full flex items-center">
                     {isPending ? "Generating Recipe..." : "Generate Recipe"}
                   </span>
-                  <span className="pr-2 flex items-center"><Sparkles size={24} /></span>
+                  <span className="pr-2 flex items-center">
+                    <Sparkles size={24} />
+                  </span>
                 </CustomButton>
               </div>
             </CardContent>
@@ -182,81 +211,40 @@ export default function RecipesPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <Tabs defaultValue="recipes" className="mx-auto max-w-6xl" value={currentTab} onValueChange={(value) => setCurrentTab(value as TabType)}>
+        <Tabs
+          defaultValue="recipes"
+          className="mx-auto max-w-6xl"
+          value={currentTab}
+          onValueChange={(value) => setCurrentTab(value as TabType)}
+        >
           <TabsList className="w-full grid grid-cols-3 h-12 shadow-2xl bg-base-secondary">
-            <TabsTrigger
-              value="recipes"
-              className="cursor-pointer text-base-foreground"
-            >
-              Recipes
-            </TabsTrigger>
-            <TabsTrigger
-              value="history"
-              className="cursor-pointer text-base-foreground"
-            >
-              History
-            </TabsTrigger>
-            <TabsTrigger
-              value="favorites"
-              className="cursor-pointer text-base-foreground"
-            >
-              Favorites
-            </TabsTrigger>
+            {tabList.map((tab, index) => {
+              return (
+                <TabsTrigger
+                  value={tab.value}
+                  key={index}
+                  className="cursor-pointer text-base-foreground"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
-
-          <TabsContent value="recipes">
-            <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              {recipes.map((recipe, index) => (
-                <RecipeCard
-                  key={index}
-                  recipe={recipe}
-                  currentTab="recipes"
-                  onFavorite={toggleFavorite}
-                />
-              ))}
-            </motion.div>
-            {recipes.length === 0 && (
-              <div className="text-center text-primary py-8 w-full">
-                Enter ingredients and generate your first recipe!
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="history">
-            <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              {searchHistory.map((recipe, index) => (
-                <RecipeCard
-                  key={index}
-                  recipe={recipe}
-                  currentTab="history"
-                  onFavorite={toggleFavorite}
-                />
-              ))}
-            </motion.div>
-            {searchHistory.length === 0 && (
-              <div className="text-center text-primary py-8">
-                Your search history will appear here
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="favorites">
-            <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              {favorites.map((recipe, index) => (
-                <RecipeCard
-                  key={index}
-                  recipe={recipe}
-                  currentTab="favorite"
-                  onFavorite={toggleFavorite}
-                />
-              ))}
-            </motion.div>
-            {favorites.length === 0 && (
-              <div className="text-center text-primary py-8">
-                Your favorite recipes will appear here
-              </div>
-            )}
-          </TabsContent>
+          <RecipeTab
+            tabData={recipes}
+            tabValue="recipes"
+            toggleFavorite={toggleFavorite}
+          />
+          <RecipeTab
+            tabData={searchHistory}
+            tabValue="history"
+            toggleFavorite={toggleFavorite}
+          />
+          <RecipeTab
+            tabData={favorites}
+            tabValue="favorites"
+            toggleFavorite={toggleFavorite}
+          />
         </Tabs>
       </motion.div>
     </>

@@ -39,7 +39,7 @@ export const createRecipe = async (ingredients: string[]): Promise<RecipeRespons
         //   Replace {dish-name} with the name of the dish, properly URL encoded.
         //   Be creative but make sure the recipe is practical and delicious.`;
         
-        const prompt = `Create a maximum of 6 recipes using these ingredients: ${ingredients.join(", ")}. Also, find a relevant image of the final dish from any image website like unsplash. The image should be a valid image either of the same dish or similar dish. Replace {dish-name} with the name of the dish. Be creative but make sure the recipe is practical and delicious.`
+        const prompt = `Create a maximum of 2 recipes using these ingredients: ${ingredients.join(", ")}. Also, find a relevant image of the final dish from any image website like unsplash. The image should be a valid image either of the same dish or similar dish. Replace {dish-name} with the name of the dish. Be creative but make sure the recipe is practical and delicious.`
             
         const config = {
             responseMimeType: 'application/json',
@@ -97,7 +97,7 @@ export const createRecipe = async (ingredients: string[]): Promise<RecipeRespons
         };
     
         const response = (result as any)?.text;
-        const recipeList = recipeAdapter(JSON.parse(response), userSession.userId);
+        const recipeList = await recipeAdapter(JSON.parse(response), userSession.userId);
 
         const recipes = (await Recipe.insertMany(recipeList)).map(doc => doc.toJSON()) as unknown as RecipeSchema[];
 
@@ -182,7 +182,7 @@ export const updateFavoriteRecipe = async(recipeId: string): Promise<RecipeRespo
     }
 
     try {
-        const recipe = await Recipe.findOne({ id: recipeId, user: userSession.userId });
+        const recipe = await Recipe.findOne({ _id: recipeId, user: userSession.userId });
 
         if (!recipe) {
             return {
@@ -197,7 +197,7 @@ export const updateFavoriteRecipe = async(recipeId: string): Promise<RecipeRespo
         return {
             success: true,
             message: 'Favorite Updated Successfully!',
-            data: recipe as unknown as RecipeSchema
+            data: recipe.toJSON() as unknown as RecipeSchema
         }
         
     } catch (error) {

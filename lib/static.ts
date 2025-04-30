@@ -18,6 +18,12 @@ export const features = [
     }
 ];
 
+export const tabList = [
+  { value: "recipes", label: "Recipes" },
+  { value: "history", label: "History" },
+  { value: "favorites", label: "Favorites" }
+];
+
 export const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
