@@ -59,7 +59,7 @@ export default function LoginPage() {
                 <div className="text-red-500 text-xs px-2">
                   <p>Password must:</p>
                   <ul>
-                    {state.errors.password.map((error: any) => (
+                    {state.errors.password.map((error: string) => (
                       <li key={error}>- {error}</li>
                     ))}
                   </ul>
@@ -79,7 +79,7 @@ export default function LoginPage() {
           </form>
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-foreground">
-              Don't have an account?{" "}
+              Don&apos;t have an account?
             </span>
             <Link href={"/signup"}>
               <Button

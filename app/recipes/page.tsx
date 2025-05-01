@@ -165,7 +165,7 @@ export default function RecipesPage() {
                 <img src={'/Logo.svg'} className="h-10 w-10" />
               </div>
               <CardTitle className="text-2xl font-bold text-base-foreground">
-                What's in your kitchen?
+                What&apos;s in your kitchen?
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">

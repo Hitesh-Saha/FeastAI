@@ -59,7 +59,7 @@ export async function login(
     }
 }
  
-export async function logout(__prevState: LogOutActionState) {
+export async function logout(): Promise<LogOutActionState> {
     try {
         await deleteSession();
         return {
@@ -67,6 +67,7 @@ export async function logout(__prevState: LogOutActionState) {
             success: true
         }
     } catch (err) {
+        console.error(err);
         return {
             message: 'An error occurred while logging out from your account.',
             success: false

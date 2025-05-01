@@ -70,7 +70,7 @@ export default function SignupPage() {
                   <div className='text-red-500 text-xs px-2'>
                     <p>Password must:</p>
                     <ul>
-                      {state.errors.password.map((error: any) => (
+                      {state.errors.password.map((error: string) => (
                         <li key={error}>- {error}</li>
                       ))}
                     </ul>

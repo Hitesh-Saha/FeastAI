@@ -83,7 +83,7 @@ export const createRecipe = async (ingredients: string[], count: number, prefere
             throw result;
         };
     
-        const response = (result as any)?.text;
+        const response = (result as {text: string})?.text;
         const recipeList = await recipeAdapter(JSON.parse(response), userSession.userId);
 
         const recipes = (await Recipe.insertMany(recipeList)).map(doc => doc.toJSON()) as unknown as RecipeSchema[];
@@ -125,6 +125,7 @@ export const getRecipeHistory = async (): Promise<RecipeResponse> => {
         }
         
     } catch (error) {
+        console.error("Error fetching recipe history:", error);
         return {
             message: "Some error occured while fetching past recipes, Please try again",
             success: false
@@ -149,8 +150,8 @@ export const getFavoriteRecipes = async (): Promise<RecipeResponse> => {
             success: true,
             data: recipes
         }
-        
     } catch (error) {
+        console.error("Error fetching favorite recipes:", error);
         return {
             message: "Some error occured while fetching past recipes, Please try again",
             success: false
@@ -186,8 +187,8 @@ export const updateFavoriteRecipe = async(recipeId: string): Promise<RecipeRespo
             message: 'Favorite Updated Successfully!',
             data: recipe.toJSON() as unknown as RecipeSchema
         }
-        
     } catch (error) {
+        console.error("Error updating favorite recipe:", error);
         return {
             message: "Some error occured while fetching past recipes, Please try again",
             success: false
