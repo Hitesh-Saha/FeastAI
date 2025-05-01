@@ -82,7 +82,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --base-100: #CF5176 !important;
-  --base-200: #421A26;
+  --base-200: #473339;
   --base-foreground: #FFFBFD;
   --base-secondary: #293B4B;
   --overlay: #8b7f7f91;
@@ -121,7 +121,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   --base-100: #CF5176 !important;
-  --base-200: #421A26;
+  --base-200: #473339;
   --base-foreground: #FFFBFD;
   --base-secondary: #293B4B;
   --overlay: #8b7f7f91;

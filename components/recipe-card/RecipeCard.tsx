@@ -11,6 +11,7 @@ import {
 import { CustomButton } from "../CustomButton";
 import { TabType } from "@/schema/common";
 import RecipeDetails from "./RecipeDetails";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface RecipeCardProps {
   recipe: RecipeSchema;
@@ -34,13 +35,13 @@ const RecipeCard = ({ recipe, currentTab, onFavorite }: RecipeCardProps) => {
         transition={{ duration: 0.3 }}
       >
         <Card className="flex flex-col gap-6 shadow-2xl rounded-4xl border-b-6 border-r-6 border-base-100 relative justify-center items-center h-full">
-          <div className="aspect-video rounded-3xl overflow-hidden w-68 flex items-center justify-center mx-auto">
+          <AspectRatio ratio={16 / 7} className="rounded-2xl overflow-hidden w-68 flex items-center justify-center mx-auto">
             <img
               src={recipe.imageUrl || "/hero-image2.jpg"}
               alt={recipe.title}
               className="w-full h-full object-cover"
             />
-          </div>
+          </AspectRatio>
           <CardTitle className="text-2xl font-extrabold text-center px-4">
             {recipe.title}
           </CardTitle>

@@ -4,6 +4,7 @@ export interface UserModel extends Document {
   name: string;
   email: string;
   password: string;
+  avatar: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +25,10 @@ const userSchema = new mongoose.Schema<UserModel>({
     required: [true, 'Please provide a password'],
     minlength: 8,
     select: false,
+  },
+  avatar: {
+    type: String,
+    required: [true, 'Please provide an avatar'],
   },
 },
 {

@@ -3,6 +3,7 @@
 import FeatureWrapper from "@/components/feature-section/FeatureWrapper";
 import HeroSection from "@/components/hero-section/HeroSection";
 import MainSectionLayout from "@/components/main-section/MainSectionLayout";
+import UsageSectionWrapper from "@/components/usage-section/UsageSectionWrapper";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <MainSectionLayout>
         <HeroSection />
       </MainSectionLayout>
+      <UsageSectionWrapper />
       <FeatureWrapper />
     </>
   );

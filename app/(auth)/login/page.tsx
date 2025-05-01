@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChefHat } from "lucide-react";
 import { useActionState, useEffect } from "react";
 import { login } from "@/app/actions/auth";
 import Link from "next/link";
@@ -33,7 +32,7 @@ export default function LoginPage() {
       <Card className="w-full rounded-4xl shadow-2xl border-b-6 border-r-6 border-base-secondary">
         <CardHeader className="flex flex-col items-center gap-4">
           <div className="flex items-start rounded-tl-[5rem] rounded-tr-[4rem] rounded-bl-[5rem] rounded-br-[9rem] bg-base p-2 w-16 h-16">
-            <ChefHat size={38} className="text-base-foreground" />
+            <img src={'/Logo.svg'} className="h-10 w-10" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
             Welcome back

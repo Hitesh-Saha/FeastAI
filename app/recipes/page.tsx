@@ -18,7 +18,18 @@ import {
 } from "../actions/recipe";
 import { TabType } from "@/schema/common";
 import RecipeTab from "@/components/recipe-tabs/RecipeTab";
-import { tabList } from "@/lib/static";
+import { preferenceList, tabList } from "@/lib/static";
+import LoadingCard from "@/components/LoadingCard";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label"
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<RecipeSchema[]>([]);
@@ -28,6 +39,9 @@ export default function RecipesPage() {
   const [newIngredient, setNewIngredient] = useState("");
   const [isPending, startTransition] = useTransition();
   const [currentTab, setCurrentTab] = useState<TabType>("recipes");
+  const [recipeCount, setRecipeCount] = useState<number>(3);
+  const [selectedPreference, setSelectedPreference] = useState<string>("");
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,10 +131,12 @@ export default function RecipesPage() {
         toast("Please add at least one ingredient");
         return;
       }
-      const response = await createRecipe(ingredients);
+      const response = await createRecipe(ingredients, recipeCount, selectedPreference || "all");
       if (response.success) {
         setRecipes(response?.data as RecipeSchema[]);
         setIngredients([]);
+        setRecipeCount(3);
+        setSelectedPreference("");
         toast.success("Recipes generated successfully!");
       } else {
         toast.error(
@@ -146,7 +162,7 @@ export default function RecipesPage() {
           <Card className="bg-overlay w-full rounded-4xl shadow-2xl">
             <CardHeader className="flex flex-col items-center gap-4">
               <div className="flex items-start rounded-tl-[5rem] rounded-tr-[4rem] rounded-bl-[5rem] rounded-br-[9rem] bg-base p-2 w-16 h-16">
-                <ChefHat size={38} className="text-base-foreground" />
+                <img src={'/Logo.svg'} className="h-10 w-10" />
               </div>
               <CardTitle className="text-2xl font-bold text-base-foreground">
                 What's in your kitchen?
@@ -185,7 +201,28 @@ export default function RecipesPage() {
                 </div>
               )}
 
-              <div className="flex justify-center items-center">
+              <div className="flex justify-center items-center gap-4">
+                <div className="flex flex-row gap-2 items-center">
+                  <Label htmlFor="responseCount" className="text-base-foreground">Number of Recipes:</Label>
+                  <Input type="number" min={2} max={6} className="rounded-lg w-16 text-base-foreground font-bold" value={recipeCount} onChange={(e) => setRecipeCount(parseInt(e.target.value))}/>
+                </div>
+                <Select onValueChange={(value) => setSelectedPreference(value)} value={selectedPreference}>
+                  <SelectTrigger className="w-[180px] bg-white">
+                    <SelectValue placeholder="Select a preference"  />
+                  </SelectTrigger>
+                  <SelectContent className="cursor-pointer">
+                    <SelectGroup>
+                      <SelectLabel>Dietary Preferences</SelectLabel>
+                      {
+                        preferenceList.map((preference, index) => (
+                          <SelectItem key={index} value={preference.value}>
+                            {preference.label}
+                          </SelectItem>
+                        ))
+                      }
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 <CustomButton
                   onClick={() => (!isPending ? generateRecipe() : "")}
                   className="bg-base-secondary h-12 border-none"
@@ -247,6 +284,8 @@ export default function RecipesPage() {
           />
         </Tabs>
       </motion.div>
+
+      <LoadingCard openModal={isPending}/>
     </>
   );
 }

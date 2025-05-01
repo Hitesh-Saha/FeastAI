@@ -44,7 +44,7 @@ export async function login(
             }
         }
 
-        await createSession(user.id, user.name);
+        await createSession(user.id, user.name, user.avatar);
         return {
             message: 'Logged in to your account successfully!',
             success: true

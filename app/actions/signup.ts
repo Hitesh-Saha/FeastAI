@@ -1,5 +1,6 @@
 "use server";
 
+import { generateAvatar } from "@/lib/avatar-generator";
 import connectDB from "@/lib/db";
 import { createSession } from "@/lib/session";
 import User from "@/models/User";
@@ -41,15 +42,17 @@ export async function signup(
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    const avatar = await generateAvatar();
 
     const user = new User({
       name,
       email,
       password: hashedPassword,
+      avatar,
     });
 
     await user.save();
-    await createSession(user.id, user.name);
+    await createSession(user.id, user.name, user.avatar);
     return {
       message: 'Account created successfully!',
       success: true

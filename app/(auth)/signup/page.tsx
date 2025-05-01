@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChefHat } from 'lucide-react';
 import { signup } from '@/app/actions/signup';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -34,7 +33,7 @@ export default function SignupPage() {
         <Card className="w-full rounded-4xl shadow-2xl border-b-6 border-r-6 border-base-secondary">
           <CardHeader className="flex flex-col items-center gap-4">
             <div className="flex items-start rounded-tl-[5rem] rounded-tr-[4rem] rounded-bl-[5rem] rounded-br-[9rem] bg-base p-2 w-16 h-16">
-              <ChefHat size={38} className='text-base-foreground'/>
+              <img src={'/Logo.svg'} className="h-10 w-10" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">
               Create an account

@@ -1,19 +1,19 @@
 "use client";
 
-import { ChefHat, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getIsAuthenticated, logout } from "@/app/actions/auth";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
-import { SessionPayload } from "@/schema/common";
 
 const Header = () => {
-  const [state, logoutHandler] = useActionState(logout, undefined);
-  const [isAuth, setIsAuth] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<string>("");
+  const [ state, logoutHandler ] = useActionState(logout, undefined);
+  const [ isAuth, setIsAuth ] = useState<boolean>(false);
+  const [ currentUser, setCurrentUser ] = useState<string>("");
+  const [ avatarSrc, setAvatarSrc ] = useState<string>("");
 
   useEffect(() => {
     if (state?.success) {
@@ -29,9 +29,11 @@ const Header = () => {
       const { isAuthenticated, session } = await getIsAuthenticated();
       setIsAuth(isAuthenticated);
       if (isAuthenticated && session) {
-        setCurrentUser((session as SessionPayload)?.name);
+        setCurrentUser(session?.name);
+        setAvatarSrc(session?.avatar);
       } else {
         setCurrentUser("");
+        setAvatarSrc("");
       }
     };
     getAuthStatus();
@@ -41,7 +43,7 @@ const Header = () => {
     <header className="py-2 px-10">
       <nav className="max-w-7xl mx-auto shadow-4xl flex justify-between items-center py-2 px-6 rounded-2xl">
         <Link href={"/"} className="flex gap-2 items-center">
-          <ChefHat size="38" />
+          <img src={'/Logo.svg'} className="w-10 h-10"/>
           <h1 className="text-2xl font-extrabold">FeastAI</h1>
         </Link>
         <div className="flex gap-5 items-center">
@@ -49,10 +51,10 @@ const Header = () => {
             <div className="flex gap-2 items-center bg-overlay rounded-full px-3 py-1">
               <Avatar>
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
+                  src={avatarSrc}
+                  alt="Avatar"
                 />
-                <AvatarFallback>
+                <AvatarFallback className="text-base-secondary">
                   {currentUser.split(" ")[0][0] +
                     currentUser.split(" ")[
                       currentUser.split(" ").length - 1

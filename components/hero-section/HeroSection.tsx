@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, ChefHat } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { containerVariants, itemLeftFadeVariants, itemVariants } from "@/lib/static";
-import { CustomButton } from "../CustomButton";
+import { CustomButton } from "@/components/CustomButton";
 
 const HeroSection = () => {
   return (
@@ -17,7 +17,7 @@ const HeroSection = () => {
         className="flex items-center justify-center"
         variants={itemVariants}
       >
-        <ChefHat size={70} />
+        <img src={'/Logo.svg'} className="h-20 w-20" />
       </motion.div>
 
       <motion.h1

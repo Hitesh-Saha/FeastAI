@@ -11,10 +11,10 @@ const FeatureWrapper = () => {
         initial="hidden"
         animate="visible"
         >
-            <h1 className="text-4xl text-base-secondary font-bold text-left">
+            <h1 className="text-4xl text-base-secondary font-bold text-center">
                 Features of FeastAI
             </h1>
-            <h3 className="text-lg text-primary text-left">
+            <h3 className="text-lg text-primary text-center">
                 Strong features to assist you in creating dishes that are both healthy
                 and tasty
             </h3>
@@ -25,9 +25,7 @@ const FeatureWrapper = () => {
                 {features.map((feature, index) => (
                 <FeatureCard
                     key={index}
-                    title={feature.title}
-                    Icon={feature.icon}
-                    description={feature.description}
+                    feature={feature}
                 />
                 ))}
             </motion.div>

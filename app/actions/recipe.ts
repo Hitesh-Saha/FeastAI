@@ -16,7 +16,7 @@ const genAI = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY }
 
 const TIMEOUT_MS = 30000;
 
-export const createRecipe = async (ingredients: string[]): Promise<RecipeResponse> => {
+export const createRecipe = async (ingredients: string[], count: number, preference: string): Promise<RecipeResponse> => {
     await connectDB();
     
     const userSession = await getSession();
@@ -26,20 +26,7 @@ export const createRecipe = async (ingredients: string[]): Promise<RecipeRespons
     }
     
     try {
-        //   const prompt = `Create a recipe using these ingredients: ${ingredients.join(", ")}.
-        //   Also, find a relevant image of the final dish from Unsplash.
-        //   Format the response as JSON with the following structure:
-        //   {
-        //     "title": "Recipe Name",
-        //     "ingredients": ["list", "of", "ingredients", "with", "measurements"],
-        //     "instructions": "Step by step cooking instructions in steps with proper numbering",
-        //     "imageUrl": "A valid URL for an image of this dish or a similar dish"
-        //   }
-
-        //   Replace {dish-name} with the name of the dish, properly URL encoded.
-        //   Be creative but make sure the recipe is practical and delicious.`;
-        
-        const prompt = `Create a maximum of 2 recipes using these ingredients: ${ingredients.join(", ")}. Also, find a relevant image of the final dish from any image website like unsplash. The image should be a valid image either of the same dish or similar dish. Replace {dish-name} with the name of the dish. Be creative but make sure the recipe is practical and delicious.`
+        const prompt = `Create a maximum of ${count} recipes using these ingredients: ${ingredients.join(", ")}. The recipes should have ${preference} diet type preference. Also, find a relevant image of the final dish from any image website like unsplash. The image should be a valid image either of the same dish or similar dish. Replace {dish-name} with the name of the dish. Be creative but make sure the recipe is practical and delicious.`
             
         const config = {
             responseMimeType: 'application/json',

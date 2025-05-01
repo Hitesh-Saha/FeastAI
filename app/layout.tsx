@@ -22,6 +22,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: 'AI Recipe Generator',
   description: 'Generate recipes from your ingredients using AI',
+  icons: {
+    icon: "/Logo.svg",
+    shortcut: "/Logo.svg",
+    apple: "/Logo.svg",
+  },
 };
 
 export default function RootLayout({
