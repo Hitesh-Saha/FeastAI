@@ -2,10 +2,9 @@
 
 An AI-powered recipe generator built with **Next.js**, **TypeScript**, and **MongoDB**, using **Gemini AI** to generate creative and personalized recipes from ingredients and dietary preferences. Perfect for food lovers, home cooks, and curious eaters!
 
----
+🔗 **Live Demo**: [https://feastai.vercel.app](https://feastai.vercel.app) 
 
-🔗 **Live Demo**: [https://feastai.vercel.app](https://feastai.vercel.app)  
-[![Live Demo](https://img.shields.io/badge/Live-FeastAI-green?style=for-the-badge)](https://feastai.vercel.app)
+[![Vercel](https://img.shields.io/badge/Live-FeastAI-blue?style=for-the-badge)](https://feastai.vercel.app)
 
 ---
 
