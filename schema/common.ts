@@ -20,3 +20,8 @@ export interface Usage {
     imageUrl: string;
     description: string;
 }
+
+export interface DietaryPreference {
+    value: string;
+    label: string;
+}

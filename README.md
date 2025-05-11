@@ -48,7 +48,7 @@ npm install
 
 ### 3. Configure environment variables
 
-create a .env file in the root and add the different variables from .env.example file
+Create a .env file in the root and add the different variables from .env.example file
 
 ### 4. Run the app
 
@@ -71,6 +71,6 @@ MIT License
 
 ## 🙌 Author
 
-Made with ❤️ by Hitesh Saha
+Made with ❤️ by **Hitesh Saha**
 
-[Website](https://www.hiteshsaha.netlify.app) • [LinkedIn](https://www.linkedin.com/in/hitesh-saha-5401671b3/) • [GitHub](https://www.github.com/Hitesh-Saha)
+[Website](https://www.hiteshsaha.netlify.app) • [LinkedIn](https://www.linkedin.com/in/hitesh-saha-5401671b3/) • [GitHub](https://www.github.com/Hitesh-Saha) • [Twitter](https://x.com/hiteshsaha03?s=21)

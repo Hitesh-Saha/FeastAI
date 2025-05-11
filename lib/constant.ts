@@ -1,4 +1,4 @@
-import { Feature, Usage } from "@/schema/common";
+import { DietaryPreference, Feature, TabType, Usage } from "@/schema/common";
 import {
   AppWindowMac,
   ChefHat,
@@ -86,13 +86,9 @@ export const usageList: Usage[] = [
   },
 ];
 
-export const tabList = [
-  { value: "recipes", label: "Recipes" },
-  { value: "history", label: "History" },
-  { value: "favorites", label: "Favorites" },
-];
+export const tabOptions: TabType[] = ['recipes', 'history', 'favorites'];
 
-export const preferenceList = [
+export const preferenceList: DietaryPreference[] = [
   { value: "all", label: "All" },
   { value: "vegan", label: "Vegan" },
   { value: "veg", label: "Vegetarian" },
@@ -102,7 +98,7 @@ export const preferenceList = [
   { value: "nut-free", label: "Nut Free" },
 ];
 
-export const ignoredIngredients = [
+export const ignoredIngredients: string[] = [
   'petrol',
   'gasoline',
   'diesel',
@@ -135,6 +131,43 @@ export const ignoredIngredients = [
   'rayon',
   'acetate',
 ];
+
+export const dietaryConflictMap: Record<string, string[]> = {
+  chicken: ["vegan", "veg"],
+  beef: ["vegan", "veg"],
+  pork: ["vegan", "veg"],
+  lamb: ["vegan", "veg"],
+  meat: ["vegan", "veg"],
+  turkey: ["vegan", "veg"],
+  duck: ["vegan", "veg"],
+  tofu: ["non-veg"],
+  shrimp: ["vegan", "veg"],
+  crab: ["vegan", "veg"],
+  lobster: ["vegan", "veg"],
+  prawn: ["vegan", "veg"],
+  squid: ["vegan", "veg"],
+  fish: ["vegan", "veg"],
+  egg: ["vegan"],
+  milk: ["vegan", "dairy-free"],
+  cheese: ["vegan", "dairy-free"],
+  butter: ["vegan", "dairy-free"],
+  wheat: ["gluten-free"],
+  barley: ["gluten-free"],
+  rye: ["gluten-free"],
+  oats: ["gluten-free"],
+  bread: ["gluten-free"],
+  pasta: ["gluten-free"],
+  cereal: ["gluten-free"],
+  flour: ["gluten-free"],
+  almond: ["nut-free"],
+  peanut: ["nut-free"],
+  cashew: ["nut-free"],
+  walnut: ["nut-free"],
+  hazelnut: ["nut-free"],
+  pistachio: ["nut-free"],
+  pecan: ["nut-free"],
+  coconut: ["nut-free"],
+};
 
 export const containerVariants = {
   hidden: { opacity: 0 },

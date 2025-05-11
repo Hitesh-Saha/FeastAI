@@ -16,9 +16,9 @@ import {
   getRecipeHistory,
   updateFavoriteRecipe,
 } from "../actions/recipe";
-import { TabType } from "@/schema/common";
+import { DietaryPreference, TabType } from "@/schema/common";
 import RecipeTab from "@/components/recipe-tabs/RecipeTab";
-import { ignoredIngredients, preferenceList, tabList } from "@/lib/constant";
+import { dietaryConflictMap, ignoredIngredients, preferenceList, tabOptions } from "@/lib/constant";
 import LoadingCard from "@/components/LoadingCard";
 import {
   Select,
@@ -41,10 +41,10 @@ export default function RecipesPage() {
   const [currentTab, setCurrentTab] = useState<TabType>("recipes");
   const [recipeCount, setRecipeCount] = useState<number>(3);
   const [selectedPreference, setSelectedPreference] = useState<string>("");
-
+  const [availablePreferences, setAvailablePreferences] = useState<DietaryPreference[]>(preferenceList);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const getTabData = async () => {
       if (currentTab === "history") {
         const response = await getRecipeHistory();
         if (response.success) {
@@ -65,8 +65,29 @@ export default function RecipesPage() {
         }
       }
     };
-    fetchData();
+    getTabData();
   }, [currentTab]);
+
+  useEffect(() => {
+    if (ingredients.length > 0) {
+      const conflicts = new Set<string>();
+
+      ingredients.forEach((ingredient) => {
+        dietaryConflictMap[ingredient]?.forEach((diet) => conflicts.add(diet));
+      });
+
+      const filteredPreferences = preferenceList.filter(
+        (opt) => !conflicts.has(opt.value)
+      );
+      setAvailablePreferences(filteredPreferences);
+      
+      if (!filteredPreferences.find((opt) => opt.value === selectedPreference)) {
+        setSelectedPreference("all");
+      }
+    } else {
+      setAvailablePreferences(preferenceList);
+    }
+  }, [ingredients]);
 
   const toggleFavorite = async (recipeId: string) => {
     try {
@@ -222,7 +243,7 @@ export default function RecipesPage() {
                     <SelectGroup>
                       <SelectLabel>Dietary Preferences</SelectLabel>
                       {
-                        preferenceList.map((preference, index) => (
+                        availablePreferences.map((preference, index) => (
                           <SelectItem key={index} value={preference.value}>
                             {preference.label}
                           </SelectItem>
@@ -263,14 +284,14 @@ export default function RecipesPage() {
           onValueChange={(value) => setCurrentTab(value as TabType)}
         >
           <TabsList className="w-full grid grid-cols-3 h-12 shadow-2xl bg-base-secondary">
-            {tabList.map((tab, index) => {
+            {tabOptions.map((tab, index) => {
               return (
                 <TabsTrigger
-                  value={tab.value}
+                  value={tab}
                   key={index}
                   className="cursor-pointer text-base-foreground"
                 >
-                  {tab.label}
+                  {tab[0].toUpperCase() + tab.slice(1)}
                 </TabsTrigger>
               );
             })}
