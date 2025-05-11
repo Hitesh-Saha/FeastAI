@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 const Header = () => {
   const [ state, logoutHandler ] = useActionState(logout, undefined);
@@ -40,7 +41,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="py-2 px-10">
+    <header className="py-2 lg:px-10">
       <nav className="max-w-7xl mx-auto shadow-4xl flex justify-between items-center py-2 px-6 rounded-2xl">
         <Link href={"/"} className="flex gap-2 items-center">
           <img src={'/Logo.svg'} className="w-10 h-10"/>
@@ -48,23 +49,30 @@ const Header = () => {
         </Link>
         <div className="flex gap-5 items-center">
           {isAuth && currentUser && (
-            <div className="flex gap-2 items-center bg-overlay rounded-full px-3 py-1">
-              <Avatar>
-                <AvatarImage
-                  src={avatarSrc}
-                  alt="Avatar"
-                />
-                <AvatarFallback className="text-base-secondary">
-                  {currentUser.split(" ")[0][0] +
-                    currentUser.split(" ")[
-                      currentUser.split(" ").length - 1
-                    ][0]}
-                </AvatarFallback>
-              </Avatar>
-              <h3 className="text-md uppercase font-extrabold">
-                {currentUser}
-              </h3>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="flex gap-2 items-center bg-overlay rounded-full px-1 md:px-3 py-1">
+                  <Avatar>
+                    <AvatarImage
+                      src={avatarSrc}
+                      alt="Avatar"
+                    />
+                    <AvatarFallback className="text-base-secondary">
+                      {currentUser.split(" ")[0][0] +
+                        currentUser.split(" ")[
+                          currentUser.split(" ").length - 1
+                        ][0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h3 className="hidden md:flex text-md uppercase font-extrabold">
+                    {currentUser}
+                  </h3>
+                </TooltipTrigger>
+                <TooltipContent className="md:hidden">
+                  {currentUser}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           {isAuth && (
             <form action={logoutHandler}>

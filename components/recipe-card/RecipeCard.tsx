@@ -35,7 +35,7 @@ const RecipeCard = ({ recipe, currentTab, onFavorite }: RecipeCardProps) => {
         transition={{ duration: 0.3 }}
       >
         <Card className="flex flex-col gap-6 shadow-2xl rounded-4xl border-b-6 border-r-6 border-base-100 relative justify-center items-center h-full">
-          <AspectRatio ratio={16 / 7} className="rounded-2xl overflow-hidden w-68 flex items-center justify-center mx-auto">
+          <AspectRatio ratio={16 / 7} className="rounded-2xl overflow-hidden w-48 lg:w-68 flex items-center justify-center mx-auto">
             <img
               src={recipe.imageUrl || "/hero-image2.jpg"}
               alt={recipe.title}

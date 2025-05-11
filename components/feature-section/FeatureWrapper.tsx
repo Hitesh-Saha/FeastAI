@@ -1,4 +1,4 @@
-import { containerVariants, features } from "@/lib/static";
+import { containerVariants, features } from "@/lib/constant";
 import { motion } from "framer-motion";
 import FeatureCard from "./FeatureCard";
 

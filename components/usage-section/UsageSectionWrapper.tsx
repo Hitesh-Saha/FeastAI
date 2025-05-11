@@ -1,4 +1,4 @@
-import { containerVariants, usageList } from "@/lib/static"
+import { containerVariants, usageList } from "@/lib/constant"
 import { motion } from "framer-motion"
 import UsageCard from "./UsageCard"
 

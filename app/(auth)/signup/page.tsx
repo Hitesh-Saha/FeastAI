@@ -27,7 +27,7 @@ export default function SignupPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        className='max-w-2xl mx-auto flex py-14 justify-center items-center'
+        className='max-w-2xl mx-auto flex flex-col gap-3 py-14 justify-center items-center'
         style={{height: '87vh'}}
       >
         <Card className="w-full rounded-4xl shadow-2xl border-b-6 border-r-6 border-base-secondary">
@@ -101,6 +101,10 @@ export default function SignupPage() {
             </div>
           </CardContent>
         </Card>
+        <div className="text-balance text-center text-xs text-base-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
+          By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+          and <a href="#">Privacy Policy</a>.
+        </div>
       </motion.div>
   );
 }

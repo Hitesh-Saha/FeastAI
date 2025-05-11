@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { containerVariants, itemLeftFadeVariants, itemVariants } from "@/lib/static";
+import { containerVariants, itemLeftFadeVariants, itemVariants } from "@/lib/constant";
 import { CustomButton } from "@/components/CustomButton";
 
 const HeroSection = () => {
@@ -34,11 +34,11 @@ const HeroSection = () => {
         Transform your ingredients into delicious recipes with the power of AI
       </motion.p>
 
-      <div className="flex justify-between mt-8 items-center gap-8 px-4">
-        <motion.div className="w-1/2 flex flex-col gap-4" variants={itemLeftFadeVariants}>
-            <h1 className="text-5xl font-bold text-left">Create Delicious</h1>
-            <h1 className="text-5xl font-bold text-left">Recipes in Seconds!</h1>
-            <h3 className="text-xl text-left">Enter your ingredients, choose your preferences, and let our AI create the perfect recipe for you.</h3>
+      <div className="flex justify-between mt-8 items-center gap-16 lg:gap-8 px-4 flex-col lg:flex-row">
+        <motion.div className="w-full lg:w-1/2 flex flex-col gap-4 items-center lg:items-start" variants={itemLeftFadeVariants}>
+            <h1 className="text-5xl font-bold text-center md:text-left">Create Delicious</h1>
+            <h1 className="text-5xl font-bold text-center md:text-left">Recipes in Seconds!</h1>
+            <h3 className="text-xl text-center md:text-left">Enter your ingredients, choose your preferences, and let our AI create the perfect recipe for you.</h3>
             <div className="mt-6 flex gap-4">
                 <Link href={"/login"}>
                     <Button
@@ -57,17 +57,19 @@ const HeroSection = () => {
                 </Link>
             </div>
         </motion.div>
-        <div className="w-1/2 flex flex-wrap gap-2">
-            <div className="w-80 h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image3.jpg"} alt={""} className="w-full h-full object-cover rounded-full"/></div>
-            <div className="w-36 h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image2.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
-            <div className="flex flex-col gap-2 justify-around">
-                <div className="flex gap-2">
-                    <div className="w-36 h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image5.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
-                    <div className="w-36 h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image4.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
-                </div>
-                <div className="w-80 h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image1.jpg"} alt={""} className="w-full h-full object-cover rounded-full"/></div>
+        <div className="w-full lg:w-1/2 flex gap-2 justify-center">
+          <div className="flex flex-col gap-2">
+            <div className="w-48 h-20 md:w-56 md:h-24 lg:w-80 lg:h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image3.jpg"} alt={""} className="w-full h-full object-cover rounded-full"/></div>
+            <div className="flex gap-2 justify-around">
+                <div className="w-20 h-20 md:w-24 md:h-24 lg:w-36 lg:h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image5.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
+                <div className="w-20 h-20 md:w-24 md:h-24 lg:w-36 lg:h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image4.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
             </div>
-            <div className="w-36 h-80 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image6.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
+            <div className="w-48 h-20 md:w-56 md:h-24 lg:w-80 lg:h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image1.jpg"} alt={""} className="w-full h-full object-cover rounded-full"/></div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <div className="w-20 h-20 md:w-24 md:h-24 lg:w-36 lg:h-36 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image2.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
+            <div className="w-20 h-48 md:w-24 md:h-56 lg:w-36 lg:h-80 flex rounded-full border-2 border-base-secondary"><img src={"/hero-image6.jpg"} alt={""} className="w-full h-full object-fill rounded-full"/></div>
+          </div>
         </div>
 
       </div>

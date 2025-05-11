@@ -1,4 +1,4 @@
-import { itemVariants } from '@/lib/static'
+import { itemVariants } from '@/lib/constant'
 import { Usage } from '@/schema/common'
 import { motion } from 'framer-motion'
 import React from 'react'
@@ -14,7 +14,7 @@ const UsageCard = ({ item }: UsageCardProps) => {
     className="p-10 py-14 bg-[#9e6e7c2e] rounded-4xl shadow-2xl flex flex-col gap-12 items-center justify-between"
     variants={itemVariants}
   >
-    <AspectRatio ratio={16/6} className="rounded-2xl overflow-hidden w-72 flex items-center justify-center mx-auto border-4 border-base-secondary">
+    <AspectRatio ratio={16/6} className="rounded-2xl overflow-hidden w-56 lg:w-72 flex items-center justify-center mx-auto border-4 border-base-secondary">
         <img
             src={item.imageUrl || '/usage-image1.png'}
             alt={item.title}

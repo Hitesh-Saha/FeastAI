@@ -102,6 +102,40 @@ export const preferenceList = [
   { value: "nut-free", label: "Nut Free" },
 ];
 
+export const ignoredIngredients = [
+  'petrol',
+  'gasoline',
+  'diesel',
+  'wood',
+  'plastic',
+  'metal',
+  'glass',
+  'rubber',
+  'paper',
+  'cardboard',
+  'styrofoam',
+  'aluminum',
+  'copper',
+  'lead',
+  'zinc',
+  'iron',
+  'steel',
+  'tin',
+  'nickel',
+  'clothes',
+  'fabric',
+  'leather',
+  'fur',
+  'wool',
+  'silk',
+  'nylon',
+  'polyester',
+  'acrylic',
+  'spandex',
+  'rayon',
+  'acetate',
+];
+
 export const containerVariants = {
   hidden: { opacity: 0 },
   visible: {

@@ -18,7 +18,7 @@ import {
 } from "../actions/recipe";
 import { TabType } from "@/schema/common";
 import RecipeTab from "@/components/recipe-tabs/RecipeTab";
-import { preferenceList, tabList } from "@/lib/static";
+import { ignoredIngredients, preferenceList, tabList } from "@/lib/constant";
 import LoadingCard from "@/components/LoadingCard";
 import {
   Select,
@@ -115,9 +115,17 @@ export default function RecipesPage() {
 
   const addIngredient = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newIngredient.trim()) {
+    const inEdible = ignoredIngredients.includes(newIngredient.toLowerCase().trim())
+    if (newIngredient.trim() && !ingredients.includes(newIngredient.toLowerCase().trim()) && !inEdible) {
       setIngredients([...ingredients, newIngredient.toLowerCase().trim()]);
       setNewIngredient("");
+    }
+    else if (inEdible) {
+      setNewIngredient("");
+      toast.error("This ingredient is not allowed.");
+    }
+    else {
+      toast.error("Please enter a valid ingredient.");
     }
   };
 
@@ -157,14 +165,14 @@ export default function RecipesPage() {
         >
           <div className="flex items-center justify-center gap-4">
             <ChefHat size={36} />
-            <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
+            <h1 className="text-3xl font-bold text-center">AI Recipe Generator</h1>
           </div>
           <Card className="bg-overlay w-full rounded-4xl shadow-2xl">
             <CardHeader className="flex flex-col items-center gap-4">
               <div className="flex items-start rounded-tl-[5rem] rounded-tr-[4rem] rounded-bl-[5rem] rounded-br-[9rem] bg-base p-2 w-16 h-16">
                 <img src={'/Logo.svg'} className="h-10 w-10" />
               </div>
-              <CardTitle className="text-2xl font-bold text-base-foreground">
+              <CardTitle className="text-2xl font-bold text-base-foreground text-center">
                 What&apos;s in your kitchen?
               </CardTitle>
             </CardHeader>
@@ -201,7 +209,7 @@ export default function RecipesPage() {
                 </div>
               )}
 
-              <div className="flex justify-center items-center gap-4">
+              <div className="flex justify-center items-center flex-wrap gap-4">
                 <div className="flex flex-row gap-2 items-center">
                   <Label htmlFor="responseCount" className="text-base-foreground">Number of Recipes:</Label>
                   <Input type="number" min={2} max={6} className="rounded-lg w-16 text-base-foreground font-bold" value={recipeCount} onChange={(e) => setRecipeCount(parseInt(e.target.value))}/>

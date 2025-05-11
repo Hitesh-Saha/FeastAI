@@ -1,4 +1,4 @@
-import { itemVariants } from "@/lib/static";
+import { itemVariants } from "@/lib/constant";
 import { Feature } from "@/schema/common";
 import { motion } from "framer-motion";
 
