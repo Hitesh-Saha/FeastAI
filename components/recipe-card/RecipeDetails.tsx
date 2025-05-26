@@ -1,59 +1,157 @@
-import React from 'react'
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { RecipeSchema } from '@/schema/recipe';
+import React from "react";
+import {
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { RecipeSchema } from "@/schema/recipe";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { RecipeReview } from "./RecipeReview";
+import { NutritionalInfo } from "./NutritionalInfo";
+import { Clock, Users, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "../ui/card";
 
 interface RecipeDetailsProps {
   recipe: RecipeSchema;
-};
-
-const RecipeDetails = ({ recipe }: RecipeDetailsProps) => {
-  return (
-    <DialogContent className="bg-base-secondary w-full h-full lg:min-w-5xl overflow-y-auto lg:overflow-hidden">
-        <DialogHeader className="flex flex-col gap-6">
-          <DialogTitle className="text-2xl font-bold text-center text-wrap border-b-2 pb-2 border-base-100">
-            {recipe.title}
-          </DialogTitle>
-          <DialogDescription className="aspect-video rounded-3xl overflow-hidden w-56 lg:w-80 flex items-center justify-center mx-auto">
-            <img
-              src={recipe.imageUrl || "/hero-image2.jpg"}
-              alt={recipe.title}
-              className="w-full h-full object-cover"
-            />
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex gap-5 mt-4 flex-col lg:flex-row">
-          <div className="flex flex-col gap-4 w-full lg:w-2/5">
-            <h3 className="text-xl font-bold uppercase">Ingredients:</h3>
-            <ScrollArea className="lg:h-[300px] pr-4">
-              <ul className="list-disc pl-5 flex flex-col gap-2 text-lg">
-                {recipe.ingredients.map((ingredient, index) => (
-                  <li key={index}>{ingredient}</li>
-                ))}
-              </ul>
-            </ScrollArea>
-          </div>
-          <Separator orientation="vertical" className="bg-base-100 hidden lg:flex" />
-          <div className="flex flex-col gap-4">
-            <h3 className="text-xl font-bold uppercase">Instructions:</h3>
-            <ScrollArea className="lg:h-[300px] pr-4">
-              <ol className="list-decimal pl-5 flex flex-col gap-2 text-lg">
-                {recipe.instructions.map((instruction, index) => (
-                  <li key={index}>{instruction}</li>
-                ))}
-              </ol>
-            </ScrollArea>
-          </div>
-        </div>
-        <div>
-          <span className="uppercase font-bold">Recipe Generated at:</span>
-          {new Date(
-            (recipe?.timestamp as string) || Date.now()
-          ).toLocaleString()}
-        </div>
-      </DialogContent>
-  )
+  onUpdate?: (updatedRecipe: RecipeSchema) => void;
 }
 
-export default RecipeDetails
+const RecipeDetails = ({ recipe, onUpdate }: RecipeDetailsProps) => (
+  <DialogContent className="w-full h-full lg:min-w-4xl max-h-[90vh] overflow-y-auto lg:overflow-x-hidden bg-card p-0">
+    <div className="relative w-full h-[300px] flex-shrink-0">
+      <img
+        src={recipe.imageUrl || "/hero-image2.jpg"}
+        alt={recipe.title}
+        className="w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/95 to-background/20" />
+    </div>
+
+    <div className="p-6 -mt-20 relative space-y-6 flex-1">
+      <DialogHeader className="space-y-4">
+        <DialogTitle className="text-3xl font-bold text-card-foreground mb-4">
+          {recipe.title}
+        </DialogTitle>
+
+        <div className="flex flex-wrap items-center gap-4 text-card-foreground">
+          <div className="flex items-center gap-2 bg-secondary/30 rounded-lg px-3 py-1.5">
+            <Clock className="h-5 w-5" />
+            <span>{recipe.cookingTime} mins</span>
+          </div>
+          <div className="flex items-center gap-2 bg-secondary/30 rounded-lg px-3 py-1.5">
+            <Users className="h-5 w-5" />
+            <span>{recipe.servings} servings</span>
+          </div>
+          {(recipe.averageRating || 0) > 0 && (
+            <div className="flex items-center gap-2 bg-secondary/30 rounded-lg px-3 py-1.5">
+              <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+              <span>
+                {recipe.averageRating?.toFixed(1)} ({recipe.reviews?.length || 0} reviews)
+              </span>
+            </div>
+          )}
+        </div>
+
+        {recipe.dietaryTags && recipe.dietaryTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {recipe.dietaryTags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </DialogHeader>
+
+      <Tabs defaultValue="recipe" className="w-full">
+        <TabsList className="w-full justify-start h-12 bg-transparent p-0 mb-2 top-0 z-10 border-b">
+          <TabsTrigger
+            value="recipe"
+            className="border-b-2 border-transparent data-[state=active]:border-primary px-4 data-[state=active]:text-base-foreground cursor-pointer"
+          >
+            Recipe
+          </TabsTrigger>
+          <TabsTrigger
+            value="nutrition"
+            className="border-b-2 border-transparent data-[state=active]:border-primary px-4 data-[state=active]:text-base-foreground cursor-pointer"
+          >
+            Nutrition
+          </TabsTrigger>
+          <TabsTrigger
+            value="reviews"
+            className="border-b-2 border-transparent data-[state=active]:border-primary px-4 data-[state=active]:text-base-foreground cursor-pointer"
+          >
+            Reviews
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="relative mt-6">
+          <TabsContent value="recipe" className="focus-visible:outline-none">
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr,3fr] gap-8">
+              <Card className="space-y-4 p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-card-foreground">Ingredients</h3>
+                <ScrollArea className="h-[400px] pr-4">
+                  <ul className="space-y-2">
+                    {recipe.ingredients.map((ingredient, index) => (
+                      <li key={index} className="flex gap-2 text-card-foreground/90">
+                        <span className="text-primary">•</span>
+                        {ingredient}
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea>
+              </Card>
+
+              <Card className="space-y-4 p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-card-foreground">Instructions</h3>
+                <ScrollArea className="h-[400px] pr-4">
+                  <ol className="space-y-4">
+                    {recipe.instructions.map((instruction, index) => (
+                      <li key={index} className="flex gap-2">
+                        <span className="font-semibold text-primary">
+                          {index + 1}.
+                        </span>
+                        <p className="text-card-foreground/90">{instruction}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </ScrollArea>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="nutrition" className="focus-visible:outline-none">
+            <NutritionalInfo
+              recipeId={recipe.id!}
+              initialNutrition={recipe.nutrition}
+              initialDietaryTags={recipe.dietaryTags}
+              servings={recipe.servings || 4}
+            />
+          </TabsContent>
+
+          <TabsContent value="reviews" className="focus-visible:outline-none">
+            <RecipeReview
+              recipeId={recipe.id!}
+              currentRating={recipe.reviews?.find(r => r.userId === recipe.user)?.rating}
+              averageRating={recipe.averageRating || 0}
+              totalReviews={recipe.reviews?.length || 0}
+              reviews={recipe.reviews}
+              recipe={recipe}
+              onUpdate={onUpdate}
+            />
+          </TabsContent>
+        </div>
+      </Tabs>
+
+      <div className="mt-6 pt-6 border-t text-sm text-card-foreground/60">
+        Generated on {new Date(recipe.timestamp as string).toLocaleDateString()}
+      </div>
+    </div>
+  </DialogContent>
+);
+
+export default RecipeDetails;

@@ -9,24 +9,28 @@ interface RecipeTabProps {
     tabData: RecipeSchema[];
     tabValue: TabType;
     toggleFavorite: (recipeId: string) => void;
+    onUpdateRecipe?: (updatedRecipe: RecipeSchema) => void;
+    userId?: string;
 }
 
-const RecipeTab = ({tabData, tabValue, toggleFavorite}: RecipeTabProps) => {
+const RecipeTab = ({tabData, tabValue, toggleFavorite, onUpdateRecipe, userId}: RecipeTabProps) => {
   return (
     <TabsContent value={tabValue}>
       <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         {tabData.map((recipe, index) => (
-          <RecipeCard
+          <RecipeCard            
             key={index}
+            isOwner={recipe.user === userId}
             recipe={recipe}
             currentTab={tabValue}
             onFavorite={toggleFavorite}
+            onUpdate={onUpdateRecipe}
           />
         ))}
       </motion.div>
       {tabData.length === 0 && (
         <div className="text-center text-primary py-8">
-          Your search history will appear here
+          {tabValue === 'history' ? 'Your search history will appear here' : tabValue === 'favorites' ? 'Your favorite recipes will appear here' : 'No recipes found'}
         </div>
       )}
     </TabsContent>
