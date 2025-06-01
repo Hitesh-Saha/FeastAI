@@ -1,4 +1,4 @@
-import { DietaryPreference, Feature, RecipeModalTab, TabOptions, TabType, Usage } from "@/schema/common";
+import { DietaryPreference, Feature, RecipeModalTab, TabOptions, Usage } from "@/schema/common";
 import {
   AppWindowMac,
   ChefHat,

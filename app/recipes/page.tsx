@@ -101,6 +101,7 @@ export default function RecipesPage() {
           }
         }
       } catch (error) {
+        console.error("Error fetching recipes:", error);
         toast.error("An error occurred while fetching recipes");
       }
     };
