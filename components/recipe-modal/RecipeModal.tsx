@@ -43,6 +43,7 @@ const RecipeModal = ({ recipe, onUpdate, isAuthenticated }: RecipeModalProps) =>
         toast.success("Recipe link copied to clipboard!");
       }
     } catch (error) {
+      console.error("Error sharing recipe:", error);
       toast.error("Failed to share recipe");
     }
   };
