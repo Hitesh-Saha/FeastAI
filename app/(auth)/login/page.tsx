@@ -9,6 +9,7 @@ import { login } from "@/app/actions/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default function LoginPage() {
   const [state, handleLogin, isPending] = useActionState(login, undefined);
@@ -49,22 +50,12 @@ export default function LoginPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Input
-                type="password"
+              <PasswordInput
                 name="password"
                 placeholder="Password"
                 required
+                error={state?.errors?.password}
               />
-              {state?.errors?.password && (
-                <div className="text-red-500 text-xs px-2">
-                  <p>Password must:</p>
-                  <ul>
-                    {state.errors.password.map((error: string) => (
-                      <li key={error}>- {error}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
             <div className="flex justify-center items-center">
               <Button

@@ -24,6 +24,15 @@ export async function deleteSession() {
 
 export const getSession = async () => {
   const cookie = (await cookies()).get('_feast_session')?.value;
-  const session = await decrypt(cookie);
-  return session as SessionPayload
+  if(cookie) {
+    const session = await decrypt(cookie);
+    if(session?.expiresAt && session.expiresAt < new Date()) {
+      await deleteSession();
+      return null;
+    }
+    return session as SessionPayload;  
+  }
+  else {
+    return null;
+  }
 }

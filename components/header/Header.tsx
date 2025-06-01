@@ -51,7 +51,7 @@ const Header = () => {
           {isAuth && currentUser && (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger className="flex gap-2 items-center bg-overlay rounded-full px-1 md:px-3 py-1">
+                <TooltipTrigger className="flex gap-2 items-center bg-overlay rounded-full px-1 py-1">
                   <Avatar>
                     <AvatarImage
                       src={avatarSrc}
@@ -64,7 +64,7 @@ const Header = () => {
                         ][0]}
                     </AvatarFallback>
                   </Avatar>
-                  <h3 className="hidden md:flex text-md uppercase font-extrabold">
+                  <h3 className="hidden md:flex text-md uppercase font-extrabold pr-1">
                     {currentUser}
                   </h3>
                 </TooltipTrigger>
@@ -87,9 +87,9 @@ const Header = () => {
           {!isAuth && (
             <Link href={'/login'}>
               <Button
-                className="flex gap-2 items-center bg-overlay px-3 py-3 cursor-pointer rounded-full"
+                className="flex gap-2 items-center bg-overlay px-4 py-1 cursor-pointer rounded-full"
                 type="submit"
-                variant="outline"
+                variant="ghost"
                 size={'lg'}
               >
                 Login

@@ -1,4 +1,4 @@
-import { DietaryPreference, Feature, TabOptions, TabType, Usage } from "@/schema/common";
+import { DietaryPreference, Feature, RecipeModalTab, TabOptions, Usage } from "@/schema/common";
 import {
   AppWindowMac,
   ChefHat,
@@ -194,6 +194,21 @@ export const dietaryConflictMap: Record<string, string[]> = {
   coconut: ["nut-free"],
 };
 
+
+export const recipeModalTabs: RecipeModalTab[] = [
+  {
+    label: "Recipe",
+    value: "recipe"
+  },
+  {
+    label: "Nutrition",
+    value: "nutrition"
+  },
+  {
+    label: "Reviews",
+    value: "review"
+  }
+]
 export const containerVariants = {
   hidden: { opacity: 0 },
   visible: {

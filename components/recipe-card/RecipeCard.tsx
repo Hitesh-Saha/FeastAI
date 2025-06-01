@@ -1,17 +1,16 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
-import { Heart, Trash, Clock, Users, Star, Globe, Lock, Sparkles, Medal, UnlockIcon } from "lucide-react";
+import { Heart, Trash, Clock, Users, Star, Lock, UnlockIcon } from "lucide-react";
 import { useState } from "react";
 import { RecipeSchema } from "@/schema/recipe";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { CustomButton } from "../CustomButton";
 import { TabType } from "@/schema/common";
-import RecipeDetails from "./RecipeDetails";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { updateRecipeVisibility } from "@/app/actions/recipe";
 import { toast } from "sonner";
+import RecipeModal from "../recipe-modal/RecipeModal";
 
 interface RecipeCardProps {
   recipe: RecipeSchema;
@@ -19,12 +18,12 @@ interface RecipeCardProps {
   onFavorite: (recipeId: string) => void;
   onUpdate?: (updatedRecipe: RecipeSchema) => void;
   isOwner?: boolean;
+  isAuthenticated?: boolean;
 }
 
-const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner }: RecipeCardProps) => {
+const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner, isAuthenticated }: RecipeCardProps) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(recipe.isFavorite);
   const [isPublic, setIsPublic] = useState<boolean>(recipe.isPublic);
-  // const [isFeatured, setIsFeatured] = useState<boolean>(recipe.featured || false);
 
   const toggleFavorite = (recipeId: string) => {
     setIsFavorite(!isFavorite);
@@ -43,19 +42,6 @@ const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner }: Recip
       toast.error(response.message || "Failed to update visibility");
     }
   };
-
-  // const toggleFeatured = async (recipeId: string) => {
-  //   const response = await updateRecipeFeatured(recipeId);
-  //   if (response.success && response.data) {
-  //     setIsFeatured(!isFeatured);
-  //     if (onUpdate) {
-  //       onUpdate(response.data as RecipeSchema);
-  //     }
-  //     toast.success(response.message);
-  //   } else {
-  //     toast.error(response.message || "Failed to update featured status");
-  //   }
-  // };
 
   return (
     <Dialog>
@@ -93,7 +79,7 @@ const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner }: Recip
 
               {/* Right side badges */}
               <div className="absolute top-2 right-4 flex gap-2">
-                <Button
+                {isAuthenticated && (<Button
                   variant="ghost"
                   size="icon"
                   onClick={() => toggleFavorite(recipe.id as string)}
@@ -108,7 +94,7 @@ const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner }: Recip
                       }`}
                     />
                   )}
-                </Button>
+                </Button>)}
                 {isOwner && (
                   <Button
                     variant="ghost"
@@ -183,7 +169,7 @@ const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner }: Recip
           </CardContent>
         </Card>
       </motion.div>
-      <RecipeDetails
+      <RecipeModal
         recipe={recipe}
         onUpdate={(updatedRecipe) => {
           if (updatedRecipe.isFavorite !== recipe.isFavorite) {
@@ -191,6 +177,7 @@ const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner }: Recip
           }
           onUpdate?.(updatedRecipe);
         }}
+        isAuthenticated={isAuthenticated}
       />
     </Dialog>
   );

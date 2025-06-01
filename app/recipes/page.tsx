@@ -3,8 +3,8 @@
 import { useState, useEffect, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ChefHat, Plus, Sparkles, History, Heart, Globe, Trash } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChefHat, Plus, Sparkles, Trash } from "lucide-react";
 import { RecipeSchema } from "@/schema/recipe";
 import { motion } from "framer-motion";
 import MainSectionLayout from "@/components/main-section/MainSectionLayout";
@@ -45,19 +45,39 @@ export default function RecipesPage() {
   const [recipeCount, setRecipeCount] = useState<number>(3);
   const [selectedPreference, setSelectedPreference] = useState<string>("");
   const [availablePreferences, setAvailablePreferences] = useState<DietaryPreference[]>(preferenceList);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>('');
 
   useEffect(() => {
     const getOwnerStatus = async () => {
-      const { session } = await getIsAuthenticated();
-      setUserId(session.userId);  
+      const { session, isAuthenticated: isAuth } = await getIsAuthenticated();
+      if(isAuth && session) {
+        setUserId(session?.userId);
+        setIsAuthenticated(isAuth);
+      }
+      else {
+        setIsAuthenticated(isAuth);
+        setUserId('');
+      }
     };
     getOwnerStatus();
   }, []);
 
+  // Filter tabs based on authentication status
+  const availableTabs = tabOptions.filter(tab => {
+    if (!isAuthenticated) {
+      return tab.value === 'recipes' || tab.value === 'featured';
+    }
+    return true;
+  });
+
   useEffect(() => {
     const getTabData = async () => {
       try {
+        if (!isAuthenticated && (currentTab === 'history' || currentTab === 'favorites')) {
+          setCurrentTab('recipes');
+          return;
+        }
         if (currentTab === "history") {
           const response = await getRecipeHistory();
           if (response.success) {
@@ -81,11 +101,12 @@ export default function RecipesPage() {
           }
         }
       } catch (error) {
+        console.error("Error fetching recipes:", error);
         toast.error("An error occurred while fetching recipes");
       }
     };
     getTabData();
-  }, [currentTab]);
+  }, [currentTab, isAuthenticated]);
 
   useEffect(() => {
     if (ingredients.length > 0) {
@@ -109,6 +130,10 @@ export default function RecipesPage() {
   }, [ingredients]);
 
   const toggleFavorite = async (recipeId: string) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to save favorites");
+      return;
+    }
     try {
       const response = await updateFavoriteRecipe(recipeId);
 
@@ -187,7 +212,7 @@ export default function RecipesPage() {
         toast("Please add at least one ingredient");
         return;
       }
-      const response = await createRecipe(ingredients, recipeCount, selectedPreference || "all");
+      const response = await createRecipe(ingredients, recipeCount, selectedPreference || "all", !isAuthenticated);
       if (response.success) {
         setRecipes(response?.data as RecipeSchema[]);
         setIngredients([]);
@@ -196,7 +221,7 @@ export default function RecipesPage() {
         toast.success("Recipes generated successfully!");
       } else {
         toast.error(
-          "An error occured while generating recipes, please try again."
+          "An error occurred while generating recipes, please try again."
         );
       }
     });
@@ -310,8 +335,8 @@ export default function RecipesPage() {
           value={currentTab}
           onValueChange={(value) => setCurrentTab(value as TabType)}
         >
-          <TabsList className="w-full grid grid-cols-4 h-12 shadow-2xl bg-base-secondary">
-            {tabOptions.map((tab, index) => {
+          <TabsList className={`w-full grid ${availableTabs.length >= 4 ? 'grid-cols-4' : 'grid-cols-2'} h-12 shadow-2xl bg-base-secondary`}>
+            {availableTabs.map((tab, index) => {
               const { icon: Icon, label, value } = tab;
               return (
                 <TabsTrigger
@@ -335,6 +360,7 @@ export default function RecipesPage() {
               ));
             }}
             userId={userId}
+            isAuthenticated={isAuthenticated}
           />
           <RecipeTab
             tabData={featuredRecipes}
@@ -346,6 +372,7 @@ export default function RecipesPage() {
               ));
             }}
             userId={userId}
+            isAuthenticated={isAuthenticated}
           />
           <RecipeTab
             tabData={searchHistory}
@@ -357,6 +384,7 @@ export default function RecipesPage() {
               ));
             }}
             userId={userId}
+            isAuthenticated={isAuthenticated}
           />
           <RecipeTab
             tabData={favorites}
@@ -368,6 +396,7 @@ export default function RecipesPage() {
               ));
             }}
             userId={userId}
+            isAuthenticated={isAuthenticated}
           />
         </Tabs>
       </motion.div>

@@ -17,19 +17,19 @@ interface Nutrition {
   sodium?: number;
 }
 
-interface NutritionalInfoProps {
+interface NutritionalTabProps {
   recipeId: string;
   initialNutrition?: Nutrition;
   initialDietaryTags?: string[];
   servings: number;
 }
 
-export const NutritionalInfo = ({
+const NutritionalTab = ({
   recipeId,
   initialNutrition,
   initialDietaryTags = [],
   servings,
-}: NutritionalInfoProps) => {
+}: NutritionalTabProps) => {
   const [nutrition, setNutrition] = useState<Nutrition>(initialNutrition || {});
   const [dietaryTags, setDietaryTags] = useState<string[]>(initialDietaryTags);
   const [selectedServings, setSelectedServings] = useState(servings);
@@ -63,10 +63,12 @@ export const NutritionalInfo = ({
   };
 
   const dietaryOptions = [
+    "Non-Vegetarian",
     "Vegetarian",
     "Vegan",
     "Gluten-Free",
     "Dairy-Free",
+    "Nut-Free",
     "Low-Carb",
     "Keto",
     "Paleo",
@@ -143,3 +145,5 @@ export const NutritionalInfo = ({
     </div>
   );
 };
+
+export default NutritionalTab;

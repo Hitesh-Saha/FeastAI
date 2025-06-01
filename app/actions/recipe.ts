@@ -4,7 +4,7 @@ import { recipeAdapter } from "@/lib/adapter";
 import connectDB from "@/lib/db";
 import { getSession } from "@/lib/session";
 import Recipe from "@/models/Recipe";
-import { GeminiRecipeSchema, RecipeResponse, RecipeResponseSchema, RecipeSchema } from "@/schema/recipe";
+import { GeminiRecipeSchema, ResponseSchema, ResponseModel, RecipeSchema } from "@/schema/recipe";
 import { GoogleGenAI, Type } from "@google/genai";
 import { Types } from "mongoose";
 import { redirect } from "next/navigation";
@@ -24,13 +24,14 @@ const CreateRecipeSchema = z.object({
     preference: z.string()
 });
 
-export const createRecipe = async (ingredients: string[], count: number, preference: string): Promise<RecipeResponse> => {
-    await connectDB();
-    
-    const userSession = await getSession();
-    
-    if(!userSession) {
-        redirect('/login');
+export const createRecipe = async (ingredients: string[], count: number, preference: string, isGuest: boolean = false): Promise<ResponseSchema> => {
+    if (!isGuest) {
+        await connectDB();
+        const userSession = await getSession();
+        
+        if(!userSession) {
+            redirect('/login');
+        }
     }
     
     try {
@@ -136,38 +137,44 @@ export const createRecipe = async (ingredients: string[], count: number, prefere
         
         // Validate the generated recipes against our schema
         const validatedRecipes = z.array(GeminiRecipeSchema).parse(parsedRecipes);
-        
-        const recipeList = await recipeAdapter(validatedRecipes, userSession.userId);
+
+        // For authenticated users, store the recipes
+        const userSession = await getSession();
+        const recipeList = await recipeAdapter(validatedRecipes, userSession ? userSession!.userId : "", isGuest);
+        if (isGuest){
+            return ResponseModel.parse({ 
+                success: true,
+                data: recipeList as unknown as RecipeSchema[]
+            });
+        }
         const recipes = (await Recipe.insertMany(recipeList)).map(doc => doc.toJSON()) as unknown as RecipeSchema[];
 
-        const validatedResponse = RecipeResponseSchema.parse({ 
+        return ResponseModel.parse({ 
             success: true,
             data: recipes
         });
-
-        return validatedResponse;
     } catch (err) {
         console.error("Error generating recipe:", err);
         if ((err as Error).message === "Request timed out") {
-            return RecipeResponseSchema.parse({
+            return ResponseModel.parse({
                 success: false,
                 message: "Recipe generation timed out. Please try again."
             });
         }
         if (err instanceof z.ZodError) {
-            return RecipeResponseSchema.parse({
+            return ResponseModel.parse({
                 success: false,
                 message: "Invalid recipe data generated. Please try again."
             });
         }
-        return RecipeResponseSchema.parse({
+        return ResponseModel.parse({
             message: "Failed to generate recipe. Please try again.",
             success: false
         });
     }
 }
 
-export const getRecipeHistory = async (): Promise<RecipeResponse> => {
+export const getRecipeHistory = async (): Promise<ResponseSchema> => {
     await connectDB();
     
     const userSession = await getSession();
@@ -193,7 +200,7 @@ export const getRecipeHistory = async (): Promise<RecipeResponse> => {
 
 }
 
-export const getFavoriteRecipes = async (): Promise<RecipeResponse> => {
+export const getFavoriteRecipes = async (): Promise<ResponseSchema> => {
     await connectDB();
     
     const userSession = await getSession();
@@ -219,7 +226,7 @@ export const getFavoriteRecipes = async (): Promise<RecipeResponse> => {
 
 }
 
-export const getFeaturedRecipes = async (): Promise<RecipeResponse> => {
+export const getFeaturedRecipes = async (): Promise<ResponseSchema> => {
     await connectDB();
     
     try {
@@ -235,13 +242,13 @@ export const getFeaturedRecipes = async (): Promise<RecipeResponse> => {
         .sort({ averageRating: -1, 'reviews.length': -1 }) // Sort by rating and reviews
         .limit(10); // Limit to 10 featured recipes
         
-        return RecipeResponseSchema.parse({
+        return ResponseModel.parse({
             success: true,
             data: recipes.map(doc => doc.toJSON()) as unknown as RecipeSchema[]
         });
     } catch (error) {
         console.error("Error fetching featured recipes:", error);
-        return RecipeResponseSchema.parse({
+        return ResponseModel.parse({
             message: "Failed to fetch featured recipes",
             success: false
         });
@@ -252,7 +259,7 @@ const UpdateRecipeParamsSchema = z.object({
     recipeId: z.string().min(1)
 });
 
-export const updateFavoriteRecipe = async(recipeId: string): Promise<RecipeResponse> => {
+export const updateFavoriteRecipe = async(recipeId: string): Promise<ResponseSchema> => {
     await connectDB();
     
     const userSession = await getSession();
@@ -268,7 +275,7 @@ export const updateFavoriteRecipe = async(recipeId: string): Promise<RecipeRespo
         const recipe = await Recipe.findOne({ _id: validatedId, user: userSession.userId });
 
         if (!recipe) {
-            return RecipeResponseSchema.parse({
+            return ResponseModel.parse({
                 message: "Recipe not found or not owned by user",
                 success: false
             });
@@ -277,7 +284,7 @@ export const updateFavoriteRecipe = async(recipeId: string): Promise<RecipeRespo
         recipe.isFavorite = !recipe.isFavorite;
         await recipe.save();
 
-        return RecipeResponseSchema.parse({
+        return ResponseModel.parse({
             success: true,
             message: 'Favorite Updated Successfully!',
             data: recipe.toJSON() as unknown as RecipeSchema
@@ -285,19 +292,19 @@ export const updateFavoriteRecipe = async(recipeId: string): Promise<RecipeRespo
     } catch (error) {
         console.error("Error updating favorite recipe:", error);
         if (error instanceof z.ZodError) {
-            return RecipeResponseSchema.parse({
+            return ResponseModel.parse({
                 message: "Invalid recipe ID provided",
                 success: false
             });
         }
-        return RecipeResponseSchema.parse({
+        return ResponseModel.parse({
             message: "Failed to update favorite status",
             success: false
         });
     }
 }
 
-export const updateRecipeVisibility = async (recipeId: string): Promise<RecipeResponse> => {
+export const updateRecipeVisibility = async (recipeId: string): Promise<ResponseSchema> => {
     await connectDB();
     
     const userSession = await getSession();
@@ -313,7 +320,7 @@ export const updateRecipeVisibility = async (recipeId: string): Promise<RecipeRe
         const recipe = await Recipe.findOne({ _id: validatedId, user: userSession.userId });
 
         if (!recipe) {
-            return RecipeResponseSchema.parse({
+            return ResponseModel.parse({
                 message: "Recipe not found or not owned by user",
                 success: false
             });
@@ -322,7 +329,7 @@ export const updateRecipeVisibility = async (recipeId: string): Promise<RecipeRe
         recipe.isPublic = !recipe.isPublic;
         await recipe.save();
 
-        return RecipeResponseSchema.parse({
+        return ResponseModel.parse({
             success: true,
             message: `Recipe is now ${recipe.isPublic ? 'public' : 'private'}`,
             data: recipe.toJSON() as unknown as RecipeSchema
@@ -330,12 +337,12 @@ export const updateRecipeVisibility = async (recipeId: string): Promise<RecipeRe
     } catch (error) {
         console.error("Error updating recipe visibility:", error);
         if (error instanceof z.ZodError) {
-            return RecipeResponseSchema.parse({
+            return ResponseModel.parse({
                 message: "Invalid recipe ID provided",
                 success: false
             });
         }
-        return RecipeResponseSchema.parse({
+        return ResponseModel.parse({
             message: "Failed to update recipe visibility",
             success: false
         });
@@ -348,7 +355,7 @@ const RateRecipeSchema = z.object({
     comment: z.string().optional()
 });
 
-export async function rateRecipe(recipeId: string, formData: FormData): Promise<RecipeResponse> {
+export async function rateRecipe(recipeId: string, formData: FormData): Promise<ResponseSchema> {
     await connectDB();
     
     const session = await getSession();
@@ -365,7 +372,7 @@ export async function rateRecipe(recipeId: string, formData: FormData): Promise<
         });
 
         if (!validatedFields.success) {
-            return RecipeResponseSchema.parse({
+            return ResponseModel.parse({
                 success: false,
                 message: "Invalid rating data provided"
             });
