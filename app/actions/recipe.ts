@@ -4,7 +4,7 @@ import { recipeAdapter } from "@/lib/adapter";
 import connectDB from "@/lib/db";
 import { getSession } from "@/lib/session";
 import Recipe from "@/models/Recipe";
-import { GeminiRecipeSchema, ResponseSchema, ResponseModel, RecipeSchema } from "@/schema/recipe";
+import { GeminiRecipeSchema, ResponseSchema, ResponseModel, RecipeSchema, RecipeParamsSchema } from "@/schema/recipe";
 import { GoogleGenAI, Type } from "@google/genai";
 import { Types } from "mongoose";
 import { redirect } from "next/navigation";
@@ -255,10 +255,6 @@ export const getFeaturedRecipes = async (): Promise<ResponseSchema> => {
     }
 }
 
-const UpdateRecipeParamsSchema = z.object({
-    recipeId: z.string().min(1)
-});
-
 export const updateFavoriteRecipe = async(recipeId: string): Promise<ResponseSchema> => {
     await connectDB();
     
@@ -270,7 +266,7 @@ export const updateFavoriteRecipe = async(recipeId: string): Promise<ResponseSch
 
     try {
         // Validate input
-        const { recipeId: validatedId } = UpdateRecipeParamsSchema.parse({ recipeId });
+        const { recipeId: validatedId } = RecipeParamsSchema.parse({ recipeId });
         
         const recipe = await Recipe.findOne({ _id: validatedId, user: userSession.userId });
 
@@ -315,7 +311,7 @@ export const updateRecipeVisibility = async (recipeId: string): Promise<Response
 
     try {
         // Validate input
-        const { recipeId: validatedId } = UpdateRecipeParamsSchema.parse({ recipeId });
+        const { recipeId: validatedId } = RecipeParamsSchema.parse({ recipeId });
         
         const recipe = await Recipe.findOne({ _id: validatedId, user: userSession.userId });
 
@@ -461,6 +457,49 @@ export async function updateRecipeDietary(
   } catch (error) {
     console.error("Error updating recipe:", error);
     return { success: false, message: "Failed to update recipe" };
+  }
+}
+
+export async function getRecipeById(recipeId: string): Promise<ResponseSchema> {
+  await connectDB();
+
+  try {
+    const { recipeId: validatedId } = RecipeParamsSchema.parse({ recipeId });
+    
+    const recipe = await Recipe.findById(validatedId);
+    
+    if (!recipe) {
+      return ResponseModel.parse({
+        success: false,
+        message: "Recipe not found"
+      });
+    }
+
+    // Only return public recipes or recipes owned by the current user
+    const session = await getSession();
+    if (!recipe.isPublic && (!session || recipe.user.toString() !== session.userId)) {
+      return ResponseModel.parse({
+        success: false,
+        message: "Recipe not found"
+      });
+    }
+
+    return ResponseModel.parse({
+      success: true,
+      data: recipe.toJSON() as unknown as RecipeSchema
+    });
+  } catch (error) {
+    console.error("Error fetching recipe:", error);
+    if (error instanceof z.ZodError) {
+      return ResponseModel.parse({
+        message: "Invalid recipe ID provided",
+        success: false
+      });
+    }
+    return ResponseModel.parse({
+      message: "Failed to fetch recipe",
+      success: false
+    });
   }
 }
 

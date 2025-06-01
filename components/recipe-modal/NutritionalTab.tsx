@@ -59,7 +59,8 @@ const NutritionalTab = ({
 
   const calculateNutritionPerServing = (value?: number) => {
     if (!value) return "N/A";
-    return ((value / servings) * selectedServings).toFixed(1);
+    const perServingValue = value / servings;
+    return (perServingValue * selectedServings).toFixed(1);
   };
 
   const dietaryOptions = [
