@@ -7,12 +7,13 @@ import { RecipeSchema } from "@/schema/recipe";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ReviewTab from "./ReviewTab";
 import NutritionalTab from "./NutritionalTab";
-import { Clock, Users, Star, Share2 } from "lucide-react";
+import { Clock, Users, Star, Share2, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DetailsTab from "./DetailsTab";
 import { recipeModalTabs } from "@/lib/constant";
 import { toast } from "sonner";
+import { generateRecipePDF } from "@/app/actions/pdf";
 
 interface RecipeModalProps {
   recipe: RecipeSchema;
@@ -46,6 +47,36 @@ const RecipeModal = ({ recipe, onUpdate, isAuthenticated }: RecipeModalProps) =>
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      if (!recipe.id) {
+        toast.error("Cannot download recipe at this time");
+        return;
+      }
+      toast.promise(
+        generateRecipePDF(recipe),
+        {
+          loading: "Generating PDF...",
+          success: (result) => {
+            if (result.success && result.url) {
+              const link = document.createElement('a');
+              link.href = result.url;
+              link.download = `${recipe.title.toLowerCase().replace(/\s+/g, '-')}-recipe.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              return "Recipe downloaded successfully!"
+            }
+          },
+          error: "Failed to generate PDF",
+        }
+      );
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error("Failed to download PDF. Please try again.");
+    }
+  };
+
   return (
     <DialogContent className="w-full h-full lg:min-w-4xl max-h-[90vh] overflow-y-auto lg:overflow-x-hidden bg-card p-0">
       <div className="relative w-full h-[300px] flex-shrink-0">
@@ -63,15 +94,26 @@ const RecipeModal = ({ recipe, onUpdate, isAuthenticated }: RecipeModalProps) =>
             <DialogTitle className="text-3xl font-bold text-card-foreground">
               {recipe.title}
             </DialogTitle>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="shrink-0"
-              onClick={handleShare}
-              title="Share recipe"
-            >
-              <Share2 className="h-5 w-5" />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                className="shrink-0 cursor-pointer"
+                onClick={handleDownload}
+                title="Download recipe"
+              >
+                <Download className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="shrink-0 cursor-pointer"
+                onClick={handleShare}
+                title="Share recipe"
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-card-foreground">
