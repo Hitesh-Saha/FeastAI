@@ -1,11 +1,15 @@
-import { DietaryPreference, Feature, TabType, Usage } from "@/schema/common";
+import { DietaryPreference, Feature, RecipeModalTab, TabOptions, Usage } from "@/schema/common";
 import {
   AppWindowMac,
   ChefHat,
   ClipboardList,
   FolderHeart,
+  Heart,
+  Plus,
   Salad,
+  Sparkles,
   Utensils,
+  History
 } from "lucide-react";
 
 export const features: Feature[] = [
@@ -86,7 +90,28 @@ export const usageList: Usage[] = [
   },
 ];
 
-export const tabOptions: TabType[] = ['recipes', 'history', 'favorites'];
+export const tabOptions: TabOptions[] = [
+  {
+    icon: Plus,
+    label: "Create Recipe",
+    value: "recipes"
+  },
+  {
+    icon: Sparkles,
+    label: "Featured",
+    value: "featured"
+  },
+  {
+    icon: History,
+    label: "History",
+    value: "history"
+  },
+  {
+    icon: Heart,
+    label: "Favorites",
+    value: "favorites"
+  }
+];
 
 export const preferenceList: DietaryPreference[] = [
   { value: "all", label: "All" },
@@ -169,6 +194,21 @@ export const dietaryConflictMap: Record<string, string[]> = {
   coconut: ["nut-free"],
 };
 
+
+export const recipeModalTabs: RecipeModalTab[] = [
+  {
+    label: "Recipe",
+    value: "recipe"
+  },
+  {
+    label: "Nutrition",
+    value: "nutrition"
+  },
+  {
+    label: "Reviews",
+    value: "review"
+  }
+]
 export const containerVariants = {
   hidden: { opacity: 0 },
   visible: {

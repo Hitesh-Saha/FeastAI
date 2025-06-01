@@ -9,6 +9,7 @@ import { signup } from '@/app/actions/signup';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { redirect } from 'next/navigation';
+import { PasswordInput } from '@/components/PasswordInput';
 
 export default function SignupPage() {
   const [ state, handleSignup, isPending ] = useActionState(signup, undefined);
@@ -60,22 +61,12 @@ export default function SignupPage() {
                 {state?.errors?.email && <p className='text-red-500 text-xs px-2'>{state.errors.email}</p>}
               </div>
               <div className="space-y-2">
-                <Input
-                  type="password"
+                <PasswordInput
                   name="password"
                   placeholder="Password"
                   required
+                  error={state?.errors?.password}
                 />
-                {state?.errors?.password && (
-                  <div className='text-red-500 text-xs px-2'>
-                    <p>Password must:</p>
-                    <ul>
-                      {state.errors.password.map((error: string) => (
-                        <li key={error}>- {error}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
               <div className='flex justify-center items-center'>
                 <Button

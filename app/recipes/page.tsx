@@ -14,6 +14,7 @@ import {
   createRecipe,
   getFavoriteRecipes,
   getRecipeHistory,
+  getFeaturedRecipes,
   updateFavoriteRecipe,
 } from "../actions/recipe";
 import { DietaryPreference, TabType } from "@/schema/common";
@@ -30,11 +31,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label"
+import { getIsAuthenticated } from "../actions/auth";
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<RecipeSchema[]>([]);
   const [searchHistory, setSearchHistory] = useState<RecipeSchema[]>([]);
   const [favorites, setFavorites] = useState<RecipeSchema[]>([]);
+  const [featuredRecipes, setFeaturedRecipes] = useState<RecipeSchema[]>([]);
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [newIngredient, setNewIngredient] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -42,31 +45,68 @@ export default function RecipesPage() {
   const [recipeCount, setRecipeCount] = useState<number>(3);
   const [selectedPreference, setSelectedPreference] = useState<string>("");
   const [availablePreferences, setAvailablePreferences] = useState<DietaryPreference[]>(preferenceList);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string>('');
+
+  useEffect(() => {
+    const getOwnerStatus = async () => {
+      const { session, isAuthenticated: isAuth } = await getIsAuthenticated();
+      if(isAuth && session) {
+        setUserId(session?.userId);
+        setIsAuthenticated(isAuth);
+      }
+      else {
+        setIsAuthenticated(isAuth);
+        setUserId('');
+      }
+    };
+    getOwnerStatus();
+  }, []);
+
+  // Filter tabs based on authentication status
+  const availableTabs = tabOptions.filter(tab => {
+    if (!isAuthenticated) {
+      return tab.value === 'recipes' || tab.value === 'featured';
+    }
+    return true;
+  });
 
   useEffect(() => {
     const getTabData = async () => {
-      if (currentTab === "history") {
-        const response = await getRecipeHistory();
-        if (response.success) {
-          setSearchHistory(response?.data as RecipeSchema[]);
-        } else {
-          toast.error(
-            "An error occured while fetching the recipes, please try again."
-          );
+      try {
+        if (!isAuthenticated && (currentTab === 'history' || currentTab === 'favorites')) {
+          setCurrentTab('recipes');
+          return;
         }
-      } else if (currentTab === "favorites") {
-        const response = await getFavoriteRecipes();
-        if (response.success) {
-          setFavorites(response?.data as RecipeSchema[]);
-        } else {
-          toast.error(
-            "An error occured while fetching the favorite recipes, please try again."
-          );
+        if (currentTab === "history") {
+          const response = await getRecipeHistory();
+          if (response.success) {
+            setSearchHistory(response.data as RecipeSchema[]);
+          } else {
+            toast.error("Failed to fetch recipe history");
+          }
+        } else if (currentTab === "favorites") {
+          const response = await getFavoriteRecipes();
+          if (response.success) {
+            setFavorites(response.data as RecipeSchema[]);
+          } else {
+            toast.error("Failed to fetch favorite recipes");
+          }
+        } else if (currentTab === "featured") {
+          const response = await getFeaturedRecipes();
+          if (response.success) {
+            setFeaturedRecipes(response.data as RecipeSchema[]);
+          } else {
+            toast.error("Failed to fetch featured recipes");
+          }
         }
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+        toast.error("An error occurred while fetching recipes");
       }
     };
     getTabData();
-  }, [currentTab]);
+  }, [currentTab, isAuthenticated]);
 
   useEffect(() => {
     if (ingredients.length > 0) {
@@ -90,6 +130,10 @@ export default function RecipesPage() {
   }, [ingredients]);
 
   const toggleFavorite = async (recipeId: string) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to save favorites");
+      return;
+    }
     try {
       const response = await updateFavoriteRecipe(recipeId);
 
@@ -113,6 +157,14 @@ export default function RecipesPage() {
         );
 
         setFavorites((prev) => {
+          if (updatedRecipe.isFavorite) {
+            return [...prev, updatedRecipe];
+          } else {
+            return prev.filter((recipe) => recipe.id !== recipeId);
+          }
+        });
+
+        setFeaturedRecipes((prev) => {
           if (updatedRecipe.isFavorite) {
             return [...prev, updatedRecipe];
           } else {
@@ -160,7 +212,7 @@ export default function RecipesPage() {
         toast("Please add at least one ingredient");
         return;
       }
-      const response = await createRecipe(ingredients, recipeCount, selectedPreference || "all");
+      const response = await createRecipe(ingredients, recipeCount, selectedPreference || "all", !isAuthenticated);
       if (response.success) {
         setRecipes(response?.data as RecipeSchema[]);
         setIngredients([]);
@@ -169,7 +221,7 @@ export default function RecipesPage() {
         toast.success("Recipes generated successfully!");
       } else {
         toast.error(
-          "An error occured while generating recipes, please try again."
+          "An error occurred while generating recipes, please try again."
         );
       }
     });
@@ -283,33 +335,68 @@ export default function RecipesPage() {
           value={currentTab}
           onValueChange={(value) => setCurrentTab(value as TabType)}
         >
-          <TabsList className="w-full grid grid-cols-3 h-12 shadow-2xl bg-base-secondary">
-            {tabOptions.map((tab, index) => {
+          <TabsList className={`w-full grid ${availableTabs.length >= 4 ? 'grid-cols-4' : 'grid-cols-2'} h-12 shadow-2xl bg-base-secondary`}>
+            {availableTabs.map((tab, index) => {
+              const { icon: Icon, label, value } = tab;
               return (
                 <TabsTrigger
-                  value={tab}
+                  value={value}
                   key={index}
-                  className="cursor-pointer text-base-foreground"
+                  className="cursor-pointer text-base-foreground flex items-center justify-center gap-1"
                 >
-                  {tab[0].toUpperCase() + tab.slice(1)}
+                  <Icon />
+                  <span className="hidden lg:flex">{label}</span>
                 </TabsTrigger>
               );
             })}
-          </TabsList>
+          </TabsList>            
           <RecipeTab
             tabData={recipes}
             tabValue="recipes"
             toggleFavorite={toggleFavorite}
+            onUpdateRecipe={(updatedRecipe) => {
+              setRecipes(prev => prev.map(recipe => 
+                recipe.id === updatedRecipe.id ? updatedRecipe : recipe
+              ));
+            }}
+            userId={userId}
+            isAuthenticated={isAuthenticated}
+          />
+          <RecipeTab
+            tabData={featuredRecipes}
+            tabValue="featured"
+            toggleFavorite={toggleFavorite}
+            onUpdateRecipe={(updatedRecipe) => {
+              setFeaturedRecipes(prev => prev.map(recipe => 
+                recipe.id === updatedRecipe.id ? updatedRecipe : recipe
+              ));
+            }}
+            userId={userId}
+            isAuthenticated={isAuthenticated}
           />
           <RecipeTab
             tabData={searchHistory}
             tabValue="history"
             toggleFavorite={toggleFavorite}
+            onUpdateRecipe={(updatedRecipe) => {
+              setSearchHistory(prev => prev.map(recipe => 
+                recipe.id === updatedRecipe.id ? updatedRecipe : recipe
+              ));
+            }}
+            userId={userId}
+            isAuthenticated={isAuthenticated}
           />
           <RecipeTab
             tabData={favorites}
             tabValue="favorites"
             toggleFavorite={toggleFavorite}
+            onUpdateRecipe={(updatedRecipe) => {
+              setFavorites(prev => prev.map(recipe => 
+                recipe.id === updatedRecipe.id ? updatedRecipe : recipe
+              ));
+            }}
+            userId={userId}
+            isAuthenticated={isAuthenticated}
           />
         </Tabs>
       </motion.div>
