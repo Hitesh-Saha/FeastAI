@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { RecipeSchema } from "@/schema/recipe";
+import Link from "next/link";
 
 interface Review {
   userId: string;
@@ -16,7 +17,7 @@ interface Review {
   createdAt: string;
 }
 
-interface RecipeReviewProps {
+interface ReviewTabProps {
   recipeId: string;
   currentRating?: number;
   averageRating: number;
@@ -24,9 +25,10 @@ interface RecipeReviewProps {
   reviews?: Review[];
   recipe: RecipeSchema;
   onUpdate?: (updatedRecipe: RecipeSchema) => void;
+  isAuthenticated?: boolean;
 }
 
-export const RecipeReview = ({
+const ReviewTab = ({
   recipeId,
   currentRating,
   averageRating,
@@ -34,7 +36,8 @@ export const RecipeReview = ({
   reviews = [],
   recipe,
   onUpdate,
-}: RecipeReviewProps) => {
+  isAuthenticated = false,
+}: ReviewTabProps) => {
   const [rating, setRating] = useState(currentRating || 0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,6 +50,11 @@ export const RecipeReview = ({
 
   const handleRatingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error("Please login to rate recipes");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const formData = new FormData();
@@ -89,29 +97,30 @@ export const RecipeReview = ({
     <div className="space-y-6">
       <Card className="p-6 rounded-xl flex flex-col gap-6">
         {/* Overall Rating Display */}
-          <div className="flex flex-col md:flex-row items-center gap-4 pb-6 border-b">
-            <div className="flex flex-col items-center px-6 py-4 bg-secondary/50 rounded-xl">
-              <span className="text-3xl font-bold">
-                {averageRating.toFixed(1)}
-              </span>
-              <div className="flex mt-2">
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <Star
-                    key={value}
-                    className={`w-4 h-4 ${
-                      value <= averageRating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-200"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm text-muted-foreground mt-1">
-                {totalReviews} {totalReviews === 1 ? "review" : "reviews"}
-              </span>
+        <div className="flex flex-col md:flex-row items-center gap-4 pb-6 border-b">
+          <div className="flex flex-col items-center px-6 py-4 bg-secondary/50 rounded-xl">
+            <span className="text-3xl font-bold">
+              {averageRating.toFixed(1)}
+            </span>
+            <div className="flex mt-2">
+              {[1, 2, 3, 4, 5].map((value) => (
+                <Star
+                  key={value}
+                  className={`w-4 h-4 ${
+                    value <= averageRating
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-200"
+                  }`}
+                />
+              ))}
             </div>
+            <span className="text-sm text-muted-foreground mt-1">
+              {totalReviews} {totalReviews === 1 ? "review" : "reviews"}
+            </span>
+          </div>
 
-            {/* Your Rating Input */}
+          {/* Rating Input Section */}
+          {isAuthenticated ? (
             <div className="space-y-2">
               <span className="text-sm font-medium">Rate this recipe</span>
               <div className="flex gap-1">
@@ -136,30 +145,44 @@ export const RecipeReview = ({
                 ))}
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                Want to rate this recipe?
+              </p>
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Login to Rate
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
 
-        {/* Review Form */}
-        <form onSubmit={handleRatingSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Share your thoughts about this recipe..."
-              className="w-full p-4 bg-secondary/20 border-0 rounded-xl resize-none focus:ring-2 focus:ring-primary/20 min-h-[120px]"
-              rows={4}
-            />
-            <p className="text-xs text-muted-foreground">
-              Your review will help others discover great recipes.
-            </p>
-          </div>
-          <Button
-            type="submit"
-            disabled={!rating || isSubmitting}
-            className="w-full sm:w-auto"
-          >
-            {isSubmitting ? "Submitting..." : "Submit Review"}
-          </Button>
-        </form>
+        {/* Review Form - Only show for authenticated users */}
+        {isAuthenticated ? (
+          <form onSubmit={handleRatingSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Share your thoughts about this recipe..."
+                className="w-full p-4 bg-secondary/20 border-0 rounded-xl resize-none focus:ring-2 focus:ring-primary/20 min-h-[120px]"
+                rows={4}
+              />
+              <p className="text-xs text-muted-foreground">
+                Your review will help others discover great recipes.
+              </p>
+            </div>
+            <Button
+              type="submit"
+              disabled={!rating || isSubmitting}
+              className="w-full sm:w-auto"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Review"}
+            </Button>
+          </form>
+        ) : null}
       </Card>
 
       {/* Reviews List */}
@@ -212,9 +235,7 @@ export const RecipeReview = ({
                       </span>
                     </div>
                     {review.comment && (
-                      <p className="text-sm leading-relaxed text-foreground/90">
-                        {review.comment}
-                      </p>
+                      <p className="text-sm text-foreground">{review.comment}</p>
                     )}
                   </div>
                 )
@@ -226,3 +247,5 @@ export const RecipeReview = ({
     </div>
   );
 };
+
+export default ReviewTab;

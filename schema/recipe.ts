@@ -44,10 +44,9 @@ const BaseRecipeSchema = z.object({
   servings: z.number().positive(),
   cookingTime: z.number().positive().optional(),
   isPublic: z.boolean(),
-  featured: z.boolean().optional()
 });
 
-const RecipeResponseSchema = z.object({
+const ResponseModel = z.object({
   data: z.union([BaseRecipeSchema, z.array(BaseRecipeSchema)]).optional(),
   message: z.string().optional(),
   success: z.boolean()
@@ -58,13 +57,13 @@ export type Review = z.infer<typeof ReviewSchema>;
 export type BaseNutrition = z.infer<typeof NutritionSchema>;
 export type GeminiRecipeResponse = z.infer<typeof GeminiRecipeSchema>;
 export type RecipeSchema = z.infer<typeof BaseRecipeSchema>;
-export type RecipeResponse = z.infer<typeof RecipeResponseSchema>;
+export type ResponseSchema = z.infer<typeof ResponseModel>;
 
 // Schema exports
 export { 
   ReviewSchema,
   NutritionSchema,
   GeminiRecipeSchema,
-  BaseRecipeSchema as RecipeSchema,
-  RecipeResponseSchema
+  BaseRecipeSchema,
+  ResponseModel
 };

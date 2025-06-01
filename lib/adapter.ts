@@ -1,10 +1,12 @@
-import { RecipeSchema, GeminiRecipeResponse, GeminiRecipeSchema } from "@/schema/recipe";
+import { RecipeSchema, GeminiRecipeResponse, GeminiRecipeSchema, BaseRecipeSchema } from "@/schema/recipe";
 import { getImageFromUnsplash } from "./image-generator";
 import { z } from "zod";
+import { Types } from "mongoose";
 
 export const recipeAdapter = async (
   recipes: GeminiRecipeResponse[],
-  user: string
+  user: string,
+  isGuest: boolean
 ) => {
   // Validate input recipes
   const validatedRecipes = z.array(GeminiRecipeSchema).safeParse(recipes);
@@ -21,11 +23,11 @@ export const recipeAdapter = async (
         )}+food`;
 
       // Create and validate transformed recipe
-      const transformedRecipe = {
+      const transformedRecipe: RecipeSchema = {
         ...recipe,
         imageUrl,
         isFavorite: false,
-        user,
+        user: isGuest ? "" : user,
         reviews: [],
         averageRating: 0,
         nutrition: recipe.nutrition || {
@@ -44,7 +46,12 @@ export const recipeAdapter = async (
         isPublic: true,
       };
 
-      const validatedRecipe = RecipeSchema.safeParse(transformedRecipe);
+      if (isGuest) {
+        transformedRecipe.id = new Types.ObjectId().toString()
+        transformedRecipe.timestamp = new Date().toISOString()
+      }
+
+      const validatedRecipe = BaseRecipeSchema.safeParse(transformedRecipe);
       if (!validatedRecipe.success) {
         throw new Error(`Failed to transform recipe ${recipe.title}: ${validatedRecipe.error.message}`);
       }

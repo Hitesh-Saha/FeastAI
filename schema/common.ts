@@ -26,6 +26,11 @@ export interface DietaryPreference {
     label: string;
 }
 
+export interface RecipeModalTab {
+    label: string;
+    value: string;
+}
+
 export interface TabOptions {
     icon: any;
     label: string;

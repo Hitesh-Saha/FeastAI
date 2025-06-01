@@ -1,26 +1,25 @@
-import React from "react";
+
 import {
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { RecipeSchema } from "@/schema/recipe";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { RecipeReview } from "./RecipeReview";
-import { NutritionalInfo } from "./NutritionalInfo";
+import ReviewTab from "./ReviewTab";
+import NutritionalTab from "./NutritionalTab";
 import { Clock, Users, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "../ui/card";
+import DetailsTab from "./DetailsTab";
+import { recipeModalTabs } from "@/lib/constant";
 
-interface RecipeDetailsProps {
+interface RecipeModalProps {
   recipe: RecipeSchema;
   onUpdate?: (updatedRecipe: RecipeSchema) => void;
+  isAuthenticated?: boolean;
 }
 
-const RecipeDetails = ({ recipe, onUpdate }: RecipeDetailsProps) => (
+const RecipeModal = ({ recipe, onUpdate, isAuthenticated }: RecipeModalProps) => (
   <DialogContent className="w-full h-full lg:min-w-4xl max-h-[90vh] overflow-y-auto lg:overflow-x-hidden bg-card p-0">
     <div className="relative w-full h-[300px] flex-shrink-0">
       <img
@@ -69,63 +68,28 @@ const RecipeDetails = ({ recipe, onUpdate }: RecipeDetailsProps) => (
 
       <Tabs defaultValue="recipe" className="w-full">
         <TabsList className="w-full justify-start h-12 bg-transparent p-0 mb-2 top-0 z-10 border-b">
-          <TabsTrigger
-            value="recipe"
-            className="border-b-2 border-transparent data-[state=active]:border-primary px-4 data-[state=active]:text-base-foreground cursor-pointer"
-          >
-            Recipe
-          </TabsTrigger>
-          <TabsTrigger
-            value="nutrition"
-            className="border-b-2 border-transparent data-[state=active]:border-primary px-4 data-[state=active]:text-base-foreground cursor-pointer"
-          >
-            Nutrition
-          </TabsTrigger>
-          <TabsTrigger
-            value="reviews"
-            className="border-b-2 border-transparent data-[state=active]:border-primary px-4 data-[state=active]:text-base-foreground cursor-pointer"
-          >
-            Reviews
-          </TabsTrigger>
+          {
+            recipeModalTabs.map((tab, index) => (
+              <TabsTrigger
+                key={index}
+                value={tab.value}
+                className="border-b-2 border-transparent data-[state=active]:border-primary px-4 data-[state=active]:text-base-foreground cursor-pointer"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))
+          }
         </TabsList>
 
         <div className="relative mt-6">
           <TabsContent value="recipe" className="focus-visible:outline-none">
-            <div className="grid grid-cols-1 lg:grid-cols-[2fr,3fr] gap-8">
-              <Card className="space-y-4 p-6 rounded-xl">
-                <h3 className="text-xl font-semibold text-card-foreground">Ingredients</h3>
-                <ScrollArea className="h-[400px] pr-4">
-                  <ul className="space-y-2">
-                    {recipe.ingredients.map((ingredient, index) => (
-                      <li key={index} className="flex gap-2 text-card-foreground/90">
-                        <span className="text-primary">•</span>
-                        {ingredient}
-                      </li>
-                    ))}
-                  </ul>
-                </ScrollArea>
-              </Card>
-
-              <Card className="space-y-4 p-6 rounded-xl">
-                <h3 className="text-xl font-semibold text-card-foreground">Instructions</h3>
-                <ScrollArea className="h-[400px] pr-4">
-                  <ol className="space-y-4">
-                    {recipe.instructions.map((instruction, index) => (
-                      <li key={index} className="flex gap-2">
-                        <span className="font-semibold text-primary">
-                          {index + 1}.
-                        </span>
-                        <p className="text-card-foreground/90">{instruction}</p>
-                      </li>
-                    ))}
-                  </ol>
-                </ScrollArea>
-              </Card>
-            </div>
+            <DetailsTab
+              recipe={recipe}
+            />
           </TabsContent>
 
           <TabsContent value="nutrition" className="focus-visible:outline-none">
-            <NutritionalInfo
+            <NutritionalTab
               recipeId={recipe.id!}
               initialNutrition={recipe.nutrition}
               initialDietaryTags={recipe.dietaryTags}
@@ -133,8 +97,8 @@ const RecipeDetails = ({ recipe, onUpdate }: RecipeDetailsProps) => (
             />
           </TabsContent>
 
-          <TabsContent value="reviews" className="focus-visible:outline-none">
-            <RecipeReview
+          <TabsContent value="review" className="focus-visible:outline-none">
+            <ReviewTab
               recipeId={recipe.id!}
               currentRating={recipe.reviews?.find(r => r.userId === recipe.user)?.rating}
               averageRating={recipe.averageRating || 0}
@@ -142,6 +106,7 @@ const RecipeDetails = ({ recipe, onUpdate }: RecipeDetailsProps) => (
               reviews={recipe.reviews}
               recipe={recipe}
               onUpdate={onUpdate}
+              isAuthenticated={isAuthenticated}
             />
           </TabsContent>
         </div>
@@ -154,4 +119,4 @@ const RecipeDetails = ({ recipe, onUpdate }: RecipeDetailsProps) => (
   </DialogContent>
 );
 
-export default RecipeDetails;
+export default RecipeModal;
