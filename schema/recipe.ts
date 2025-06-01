@@ -52,6 +52,10 @@ const ResponseModel = z.object({
   success: z.boolean()
 });
 
+const RecipeParamsSchema = z.object({
+  recipeId: z.string().min(1)
+});
+
 // Type exports
 export type Review = z.infer<typeof ReviewSchema>;
 export type BaseNutrition = z.infer<typeof NutritionSchema>;
@@ -65,5 +69,6 @@ export {
   NutritionSchema,
   GeminiRecipeSchema,
   BaseRecipeSchema,
-  ResponseModel
+  ResponseModel,
+  RecipeParamsSchema
 };

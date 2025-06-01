@@ -18,7 +18,7 @@ const UsageSectionWrapper = () => {
             Generate Delicious Recipes in just a few simple steps!
           </h3>
           <motion.div
-            className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-12"
+            className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-12 px-4"
             variants={containerVariants}
           >
               {usageList.map((usage, index) => (
