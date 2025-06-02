@@ -8,19 +8,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { signup } from '@/app/actions/signup';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { PasswordInput } from '@/components/PasswordInput';
+import { getIsAuthenticated } from '@/app/actions/auth';
 
 export default function SignupPage() {
   const [ state, handleSignup, isPending ] = useActionState(signup, undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { isAuthenticated } = await getIsAuthenticated();
+      if (isAuthenticated) {
+        router.replace('/recipes');
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   useEffect(() => {
     if (state?.success) {
       toast.success(state?.message);
-      redirect('/recipes');
+      router.replace('/recipes');
     }
     else if(!state?.success && (state?.errors || state?.message)) {
       toast.error(state?.message);
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
       <motion.div
@@ -60,22 +74,12 @@ export default function SignupPage() {
                 {state?.errors?.email && <p className='text-red-500 text-xs px-2'>{state.errors.email}</p>}
               </div>
               <div className="space-y-2">
-                <Input
-                  type="password"
+                <PasswordInput
                   name="password"
                   placeholder="Password"
                   required
+                  error={state?.errors?.password}
                 />
-                {state?.errors?.password && (
-                  <div className='text-red-500 text-xs px-2'>
-                    <p>Password must:</p>
-                    <ul>
-                      {state.errors.password.map((error: string) => (
-                        <li key={error}>- {error}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
               <div className='flex justify-center items-center'>
                 <Button

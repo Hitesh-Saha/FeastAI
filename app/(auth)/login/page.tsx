@@ -7,19 +7,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActionState, useEffect } from "react";
 import { login } from "@/app/actions/auth";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { PasswordInput } from "@/components/PasswordInput";
+import { getIsAuthenticated } from "@/app/actions/auth";
 
 export default function LoginPage() {
   const [state, handleLogin, isPending] = useActionState(login, undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { isAuthenticated } = await getIsAuthenticated();
+      if (isAuthenticated) {
+        router.replace('/recipes');
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   useEffect(() => {
     if (state?.success) {
       toast.success(state?.message);
-      redirect("/recipes");
+      router.replace("/recipes");
     } else if (!state?.success && (state?.errors || state?.message)) {
       toast.error(state?.message);
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <motion.div
@@ -49,22 +63,12 @@ export default function LoginPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Input
-                type="password"
+              <PasswordInput
                 name="password"
                 placeholder="Password"
                 required
+                error={state?.errors?.password}
               />
-              {state?.errors?.password && (
-                <div className="text-red-500 text-xs px-2">
-                  <p>Password must:</p>
-                  <ul>
-                    {state.errors.password.map((error: string) => (
-                      <li key={error}>- {error}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
             <div className="flex justify-center items-center">
               <Button

@@ -19,7 +19,7 @@ const FeatureWrapper = () => {
                 and tasty
             </h3>
             <motion.div
-                className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-8"
+                className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-8 px-4"
                 variants={containerVariants}
             >
                 {features.map((feature, index) => (

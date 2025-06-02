@@ -7,7 +7,7 @@ export interface SessionPayload extends JWTPayload {
     expiresAt: Date
 };
 
-export type TabType = 'recipes' | 'history' | 'favorites';
+export type TabType = 'recipes' | 'history' | 'favorites' | 'featured';
 
 export interface Feature {
     title: string;
@@ -24,4 +24,15 @@ export interface Usage {
 export interface DietaryPreference {
     value: string;
     label: string;
+}
+
+export interface RecipeModalTab {
+    label: string;
+    value: string;
+}
+
+export interface TabOptions {
+    icon: any;
+    label: string;
+    value: TabType;
 }

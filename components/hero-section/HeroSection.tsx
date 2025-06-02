@@ -39,22 +39,21 @@ const HeroSection = () => {
             <h1 className="text-5xl font-bold text-center md:text-left">Create Delicious</h1>
             <h1 className="text-5xl font-bold text-center md:text-left">Recipes in Seconds!</h1>
             <h3 className="text-xl text-center md:text-left">Enter your ingredients, choose your preferences, and let our AI create the perfect recipe for you.</h3>
-            <div className="mt-6 flex gap-4">
-                <Link href={"/login"}>
-                    <Button
-                        size="lg"
-                        variant="outline"
-                        className="cursor-pointer bg-overlay rounded-full"
-                    >
-                        Login
-                    </Button>
-                </Link>
-                <Link href={"/signup"}>
-                    <CustomButton
-                    >
-                      <span>Get Started</span> <ArrowRight size={36} />
-                    </CustomButton>
-                </Link>
+            <div className="mt-6 flex flex-wrap gap-4">
+              <Link href={"/recipes"}>
+                <Button
+                    size="lg"
+                    variant="ghost"
+                    className="cursor-pointer bg-overlay rounded-full"
+                >
+                    Continue as Guest
+                </Button>
+              </Link>
+              <Link href={"/signup"}>
+                <CustomButton>
+                  <span>Get Started</span> <ArrowRight size={36} />
+                </CustomButton>
+              </Link>
             </div>
         </motion.div>
         <div className="w-full lg:w-1/2 flex gap-2 justify-center">

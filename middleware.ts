@@ -1,31 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from './lib/session'
- 
-const protectedRoutes = ['/recipes']
-const publicRoutes = ['/login', '/signup', '/']
- 
-export default async function middleware(req: NextRequest) {
-  const path = req.nextUrl.pathname
-  const isProtectedRoute = protectedRoutes.includes(path)
-  const isPublicRoute = publicRoutes.includes(path)
 
-  const session = await getSession();
+// Routes that require authentication
+const authRequiredRoutes = [
+  '/recipes/history',
+  '/recipes/favorites',
+  '/profile',
+  '/settings'
+]
 
-  if (isProtectedRoute && !session?.userId) {
-    return NextResponse.redirect(new URL('/login', req.nextUrl))
+// Routes that are public but redirect to recipes if authenticated
+const publicOnlyRoutes = ['/login', '/signup']
+
+// Routes that are always public
+const publicRoutes = ['/', '/recipes']
+
+export async function middleware(request: NextRequest) {
+  const session = await getSession()
+  const isAuthRoute = request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup'
+
+  // If user is authenticated and trying to access auth routes, redirect to /recipes
+  if (session && isAuthRoute) {
+    return NextResponse.redirect(new URL('/recipes', request.url))
   }
 
-  if (
-    isPublicRoute &&
-    session?.userId &&
-    !req.nextUrl.pathname.startsWith('/recipes')
-  ) {
-    return NextResponse.redirect(new URL('/recipes', req.nextUrl))
-  }
- 
+  // Allow all other routes to proceed normally
   return NextResponse.next()
 }
- 
+
 // Routes Middleware should not run on
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
