@@ -93,7 +93,7 @@ export const usageList: Usage[] = [
 export const tabOptions: TabOptions[] = [
   {
     icon: Plus,
-    label: "Create Recipe",
+    label: "Generate Recipe",
     value: "recipes"
   },
   {

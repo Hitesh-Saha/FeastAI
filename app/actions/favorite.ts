@@ -1,7 +1,6 @@
 'use server'
 
 import Favorite from "@/models/Favorite";
-import mongoose from "mongoose";
 import connectDB from "@/lib/db";
 import { getSession } from "@/lib/session";
 import Recipe from "@/models/Recipe";

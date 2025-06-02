@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActionState, useEffect } from "react";
 import { login } from "@/app/actions/auth";
 import Link from "next/link";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/PasswordInput";
 import { getIsAuthenticated } from "@/app/actions/auth";
