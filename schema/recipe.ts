@@ -33,7 +33,6 @@ const BaseRecipeSchema = z.object({
   instructions: z.array(z.string()),
   imageUrl: z.string().url(),
   timestamp: z.string().datetime().optional(),
-  isFavorite: z.boolean(),
   user: z.string(),
   reviews: z.array(ReviewSchema).optional(),
   averageRating: z.number().min(0).max(5).optional(),
@@ -46,6 +45,14 @@ const BaseRecipeSchema = z.object({
   isPublic: z.boolean(),
 });
 
+// Add a new schema for favorites
+const FavoriteModel = z.object({
+  id: z.string().optional(),
+  userId: z.string(),
+  recipeId: z.string(),
+  createdAt: z.string().datetime()
+});
+
 const ResponseModel = z.object({
   data: z.union([BaseRecipeSchema, z.array(BaseRecipeSchema)]).optional(),
   message: z.string().optional(),
@@ -56,11 +63,24 @@ const RecipeParamsSchema = z.object({
   recipeId: z.string().min(1)
 });
 
+const CreateRecipeSchema = z.object({
+  ingredients: z.array(z.string()).min(1),
+  count: z.number().int().min(1).max(6),
+  preference: z.string()
+});
+
+const RateRecipeSchema = z.object({
+  recipeId: z.string().min(1),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().optional()
+});
+
 // Type exports
 export type Review = z.infer<typeof ReviewSchema>;
 export type BaseNutrition = z.infer<typeof NutritionSchema>;
 export type GeminiRecipeResponse = z.infer<typeof GeminiRecipeSchema>;
 export type RecipeSchema = z.infer<typeof BaseRecipeSchema>;
+export type FavoriteSchema = z.infer<typeof FavoriteModel>;
 export type ResponseSchema = z.infer<typeof ResponseModel>;
 
 // Schema exports
@@ -69,6 +89,9 @@ export {
   NutritionSchema,
   GeminiRecipeSchema,
   BaseRecipeSchema,
+  FavoriteModel,
   ResponseModel,
-  RecipeParamsSchema
+  RecipeParamsSchema,
+  CreateRecipeSchema,
+  RateRecipeSchema
 };
