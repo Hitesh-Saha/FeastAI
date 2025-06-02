@@ -12,11 +12,10 @@ import { toast } from "sonner";
 import { CustomButton } from "@/components/CustomButton";
 import {
   createRecipe,
-  getFavoriteRecipes,
   getRecipeHistory,
   getFeaturedRecipes,
-  updateFavoriteRecipe,
 } from "../actions/recipe";
+import { getUserFavorites } from "../actions/favorite";
 import { DietaryPreference, TabType } from "@/schema/common";
 import RecipeTab from "@/components/recipe-tabs/RecipeTab";
 import { dietaryConflictMap, ignoredIngredients, preferenceList, tabOptions } from "@/lib/constant";
@@ -86,7 +85,7 @@ export default function RecipesPage() {
             toast.error("Failed to fetch recipe history");
           }
         } else if (currentTab === "favorites") {
-          const response = await getFavoriteRecipes();
+          const response = await getUserFavorites();
           if (response.success) {
             setFavorites(response.data as RecipeSchema[]);
           } else {
@@ -129,56 +128,13 @@ export default function RecipesPage() {
     }
   }, [ingredients]);
 
-  const toggleFavorite = async (recipeId: string) => {
-    if (!isAuthenticated) {
-      toast.error("Please login to save favorites");
-      return;
-    }
+  const toggleFavorite = async () => {
     try {
-      const response = await updateFavoriteRecipe(recipeId);
-
-      if (response.success && response.data) {
-        const updatedRecipe = response.data as RecipeSchema;
-
-        setRecipes((prev) =>
-          prev.map((recipe) =>
-            recipe.id === recipeId
-              ? { ...recipe, isFavorite: updatedRecipe.isFavorite }
-              : recipe
-          )
-        );
-
-        setSearchHistory((prev) =>
-          prev.map((recipe) =>
-            recipe.id === recipeId
-              ? { ...recipe, isFavorite: updatedRecipe.isFavorite }
-              : recipe
-          )
-        );
-
-        setFavorites((prev) => {
-          if (updatedRecipe.isFavorite) {
-            return [...prev, updatedRecipe];
-          } else {
-            return prev.filter((recipe) => recipe.id !== recipeId);
-          }
-        });
-
-        setFeaturedRecipes((prev) => {
-          if (updatedRecipe.isFavorite) {
-            return [...prev, updatedRecipe];
-          } else {
-            return prev.filter((recipe) => recipe.id !== recipeId);
-          }
-        });
-
-        toast.success(
-          updatedRecipe.isFavorite
-            ? "Recipe added to favorites!"
-            : "Recipe removed from favorites"
-        );
-      } else {
-        toast.error(response.message || "Failed to update favorite status");
+      if (currentTab === "favorites") {
+        const favoritesResponse = await getUserFavorites();
+        if (favoritesResponse.success && favoritesResponse.data) {
+          setFavorites(favoritesResponse.data as RecipeSchema[]);
+        }
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -252,9 +208,10 @@ export default function RecipesPage() {
             <CardContent className="flex flex-col gap-6">
               <form onSubmit={addIngredient} className="flex gap-4">
                 <Input
+                  type="text"
+                  placeholder="Enter an ingredient..."
                   value={newIngredient}
                   onChange={(e) => setNewIngredient(e.target.value)}
-                  placeholder="Enter an ingredient"
                   className="flex-1 rounded-4xl bg-white"
                 />
                 <CustomButton>
@@ -290,9 +247,9 @@ export default function RecipesPage() {
                 <Select onValueChange={(value) => setSelectedPreference(value)} value={selectedPreference}>
                   <SelectTrigger className="w-[180px] bg-white">
                     <SelectValue placeholder="Select a preference"  />
-                  </SelectTrigger>
+                    </SelectTrigger>
                   <SelectContent className="cursor-pointer">
-                    <SelectGroup>
+                      <SelectGroup>
                       <SelectLabel>Dietary Preferences</SelectLabel>
                       {
                         availablePreferences.map((preference, index) => (
@@ -301,9 +258,9 @@ export default function RecipesPage() {
                           </SelectItem>
                         ))
                       }
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 <CustomButton
                   onClick={() => (!isPending ? generateRecipe() : "")}
                   className="bg-base-secondary h-12 border-none"

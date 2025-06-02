@@ -26,7 +26,6 @@ export const recipeAdapter = async (
       const transformedRecipe: RecipeSchema = {
         ...recipe,
         imageUrl,
-        isFavorite: false,
         user: isGuest ? "" : user,
         reviews: [],
         averageRating: 0,

@@ -7,20 +7,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActionState, useEffect } from "react";
 import { login } from "@/app/actions/auth";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/PasswordInput";
+import { getIsAuthenticated } from "@/app/actions/auth";
 
 export default function LoginPage() {
   const [state, handleLogin, isPending] = useActionState(login, undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { isAuthenticated } = await getIsAuthenticated();
+      if (isAuthenticated) {
+        router.replace('/recipes');
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   useEffect(() => {
     if (state?.success) {
       toast.success(state?.message);
-      redirect("/recipes");
+      router.replace("/recipes");
     } else if (!state?.success && (state?.errors || state?.message)) {
       toast.error(state?.message);
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <motion.div

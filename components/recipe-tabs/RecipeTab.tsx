@@ -24,7 +24,7 @@ const RecipeTab = ({tabData, tabValue, toggleFavorite, onUpdateRecipe, userId, i
             isOwner={recipe.user !== "" && recipe.user === userId}
             recipe={recipe}
             currentTab={tabValue}
-            onFavorite={toggleFavorite}
+            onFavoriteToggle={toggleFavorite}
             onUpdate={onUpdateRecipe}
             isAuthenticated={isAuthenticated}
           />

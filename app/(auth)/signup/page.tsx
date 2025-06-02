@@ -8,20 +8,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { signup } from '@/app/actions/signup';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { PasswordInput } from '@/components/PasswordInput';
+import { getIsAuthenticated } from '@/app/actions/auth';
 
 export default function SignupPage() {
   const [ state, handleSignup, isPending ] = useActionState(signup, undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { isAuthenticated } = await getIsAuthenticated();
+      if (isAuthenticated) {
+        router.replace('/recipes');
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   useEffect(() => {
     if (state?.success) {
       toast.success(state?.message);
-      redirect('/recipes');
+      router.replace('/recipes');
     }
     else if(!state?.success && (state?.errors || state?.message)) {
       toast.error(state?.message);
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
       <motion.div

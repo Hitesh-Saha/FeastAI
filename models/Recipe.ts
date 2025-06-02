@@ -23,7 +23,6 @@ export interface RecipeModel extends Document {
   instructions: string[];
   imageUrl: string;
   timestamp: Date;
-  isFavorite: boolean;
   user: Types.ObjectId;
   reviews: Review[];
   averageRating: number;
@@ -88,10 +87,6 @@ const recipeSchema = new mongoose.Schema<RecipeModel>(
       required: true,
       default: Date.now,
     },
-    isFavorite: {
-      type: Boolean,
-      required: true,
-    },    
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
@@ -123,7 +118,8 @@ const recipeSchema = new mongoose.Schema<RecipeModel>(
       type: Number,
       required: true,
       default: 30,
-    },    isPublic: {
+    },
+    isPublic: {
       type: Boolean,
       default: true,
     }
