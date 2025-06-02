@@ -4,7 +4,7 @@ import { recipeAdapter } from "@/lib/adapter";
 import connectDB from "@/lib/db";
 import { getSession } from "@/lib/session";
 import Recipe from "@/models/Recipe";
-import { GeminiRecipeSchema, ResponseSchema, ResponseModel, RecipeSchema, RecipeParamsSchema } from "@/schema/recipe";
+import { GeminiRecipeSchema, ResponseSchema, ResponseModel, RecipeSchema, RecipeParamsSchema, CreateRecipeSchema, RateRecipeSchema } from "@/schema/recipe";
 import { GoogleGenAI, Type } from "@google/genai";
 import { Types } from "mongoose";
 import { redirect } from "next/navigation";
@@ -17,12 +17,6 @@ if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
 const genAI = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
 
 const TIMEOUT_MS = 30000;
-
-const CreateRecipeSchema = z.object({
-    ingredients: z.array(z.string()).min(1),
-    count: z.number().int().min(1).max(6),
-    preference: z.string()
-});
 
 export const createRecipe = async (ingredients: string[], count: number, preference: string, isGuest: boolean = false): Promise<ResponseSchema> => {
     if (!isGuest) {
@@ -200,32 +194,6 @@ export const getRecipeHistory = async (): Promise<ResponseSchema> => {
 
 }
 
-export const getFavoriteRecipes = async (): Promise<ResponseSchema> => {
-    await connectDB();
-    
-    const userSession = await getSession();
-    
-    if(!userSession) {
-        redirect('/login');
-    }
-
-    try {
-        const recipes = (await Recipe.find({ user: userSession.userId, isFavorite: true }).sort({ timestamp: -1 })).map(doc => doc.toJSON()) as unknown as RecipeSchema[];
-        
-        return {
-            success: true,
-            data: recipes
-        }
-    } catch (error) {
-        console.error("Error fetching favorite recipes:", error);
-        return {
-            message: "Some error occured while fetching past recipes, Please try again",
-            success: false
-        };
-    }
-
-}
-
 export const getFeaturedRecipes = async (): Promise<ResponseSchema> => {
     await connectDB();
     
@@ -250,51 +218,6 @@ export const getFeaturedRecipes = async (): Promise<ResponseSchema> => {
         console.error("Error fetching featured recipes:", error);
         return ResponseModel.parse({
             message: "Failed to fetch featured recipes",
-            success: false
-        });
-    }
-}
-
-export const updateFavoriteRecipe = async(recipeId: string): Promise<ResponseSchema> => {
-    await connectDB();
-    
-    const userSession = await getSession();
-    
-    if(!userSession) {
-        redirect('/login');
-    }
-
-    try {
-        // Validate input
-        const { recipeId: validatedId } = RecipeParamsSchema.parse({ recipeId });
-        
-        const recipe = await Recipe.findOne({ _id: validatedId, user: userSession.userId });
-
-        if (!recipe) {
-            return ResponseModel.parse({
-                message: "Recipe not found or not owned by user",
-                success: false
-            });
-        }
-        
-        recipe.isFavorite = !recipe.isFavorite;
-        await recipe.save();
-
-        return ResponseModel.parse({
-            success: true,
-            message: 'Favorite Updated Successfully!',
-            data: recipe.toJSON() as unknown as RecipeSchema
-        });
-    } catch (error) {
-        console.error("Error updating favorite recipe:", error);
-        if (error instanceof z.ZodError) {
-            return ResponseModel.parse({
-                message: "Invalid recipe ID provided",
-                success: false
-            });
-        }
-        return ResponseModel.parse({
-            message: "Failed to update favorite status",
             success: false
         });
     }
@@ -344,12 +267,6 @@ export const updateRecipeVisibility = async (recipeId: string): Promise<Response
         });
     }
 }
-
-const RateRecipeSchema = z.object({
-    recipeId: z.string().min(1),
-    rating: z.number().int().min(1).max(5),
-    comment: z.string().optional()
-});
 
 export async function rateRecipe(recipeId: string, formData: FormData): Promise<ResponseSchema> {
     await connectDB();

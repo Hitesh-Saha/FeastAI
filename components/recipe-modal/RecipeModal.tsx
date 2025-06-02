@@ -7,7 +7,7 @@ import { RecipeSchema } from "@/schema/recipe";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ReviewTab from "./ReviewTab";
 import NutritionalTab from "./NutritionalTab";
-import { Clock, Users, Star, Share2, Download } from "lucide-react";
+import { Clock, Users, Star, Share2, Download, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DetailsTab from "./DetailsTab";
@@ -19,9 +19,11 @@ interface RecipeModalProps {
   recipe: RecipeSchema;
   onUpdate?: (updatedRecipe: RecipeSchema) => void;
   isAuthenticated?: boolean;
+  isFavorited?: boolean;
+  onFavoriteToggle?: (recipeId: string) => void;
 }
 
-const RecipeModal = ({ recipe, onUpdate, isAuthenticated }: RecipeModalProps) => {
+const RecipeModal = ({ recipe, onUpdate, isAuthenticated, isFavorited, onFavoriteToggle }: RecipeModalProps) => {
   const handleShare = async () => {
     if (!recipe.id) {
       toast.error("Cannot share recipe at this time");
@@ -96,6 +98,17 @@ const RecipeModal = ({ recipe, onUpdate, isAuthenticated }: RecipeModalProps) =>
               {recipe.title}
             </DialogTitle>
             <div className="flex gap-2">
+              {isAuthenticated && recipe.id && (
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="shrink-0 cursor-pointer"
+                  onClick={() => onFavoriteToggle?.(recipe.id!)}
+                  title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Heart className={`h-5 w-5 transition-colors ${isFavorited ? "fill-red-500 text-red-500" : ""}`} />
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 size="icon"

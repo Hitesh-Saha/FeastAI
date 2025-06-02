@@ -2,32 +2,60 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Heart, Trash, Clock, Users, Star, Lock, UnlockIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RecipeSchema } from "@/schema/recipe";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { TabType } from "@/schema/common";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { updateRecipeVisibility } from "@/app/actions/recipe";
+import { getFavoriteStatus, updateFavorite } from "@/app/actions/favorite";
 import { toast } from "sonner";
 import RecipeModal from "../recipe-modal/RecipeModal";
 
 interface RecipeCardProps {
   recipe: RecipeSchema;
   currentTab: TabType;
-  onFavorite: (recipeId: string) => void;
+  onFavoriteToggle?: (recipeId: string) => void;
   onUpdate?: (updatedRecipe: RecipeSchema) => void;
   isOwner?: boolean;
   isAuthenticated?: boolean;
 }
 
-const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner, isAuthenticated }: RecipeCardProps) => {
-  const [isFavorite, setIsFavorite] = useState<boolean>(recipe.isFavorite);
+const RecipeCard = ({ recipe, currentTab, onFavoriteToggle, onUpdate, isOwner, isAuthenticated }: RecipeCardProps) => {
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [isPublic, setIsPublic] = useState<boolean>(recipe.isPublic);
 
-  const toggleFavorite = (recipeId: string) => {
-    setIsFavorite(!isFavorite);
-    onFavorite(recipeId);
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (isAuthenticated && recipe.id) {
+        const response = await getFavoriteStatus(recipe.id);
+        if (response.success) {
+          setIsFavorite(response.isFavorited);
+        }
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [recipe.id, isAuthenticated]);
+  
+
+  const handleToggleFavorite = async (recipeId: string) => {
+    
+    if (!isAuthenticated) {
+      toast.error("Please log in to favorite recipes");
+      return;
+    }
+    const response = await updateFavorite(recipeId);
+    if (response.success) {
+      setIsFavorite(response.isFavorited || false);
+      toast.success(response.message);
+      if (onFavoriteToggle) {
+        onFavoriteToggle(recipeId);
+      }
+    } else {
+      toast.error(response.message);
+    }
   };
 
   const toggleVisibility = async (recipeId: string) => {
@@ -82,7 +110,7 @@ const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner, isAuthe
                 {isAuthenticated && (<Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => toggleFavorite(recipe.id as string)}
+                  onClick={() => handleToggleFavorite(recipe.id as string)}
                   className="bg-background/80 backdrop-blur-sm hover:bg-background/90 h-8 w-8 rounded-full cursor-pointer"
                 >
                   {currentTab === "favorites" ? (
@@ -171,13 +199,10 @@ const RecipeCard = ({ recipe, currentTab, onFavorite, onUpdate, isOwner, isAuthe
       </motion.div>
       <RecipeModal
         recipe={recipe}
-        onUpdate={(updatedRecipe) => {
-          if (updatedRecipe.isFavorite !== recipe.isFavorite) {
-            setIsFavorite(updatedRecipe.isFavorite);
-          }
-          onUpdate?.(updatedRecipe);
-        }}
+        onUpdate={onUpdate}
         isAuthenticated={isAuthenticated}
+        isFavorited={isFavorite}
+        onFavoriteToggle={(recipeId: string) => handleToggleFavorite(recipeId)}
       />
     </Dialog>
   );
